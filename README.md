@@ -123,13 +123,13 @@ The `look` action takes only one value which is the text to display when activat
 } >>
 ```
 
-For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.
+For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use.
 
 #### Remember
 
 ```javascript
 <<set $photo = {
-		name: "a photo of a man",
+  	name: "a photo of a man",
     keywords: ['photo', 'picture', 'image'],
     possibleActions: {
       remember: {
@@ -141,7 +141,7 @@ For `take` the first option is `enabled` which determines if you can take the ob
 } >>
 ```
 
-For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object.
+For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory.
 
 ### Custom actions
 
