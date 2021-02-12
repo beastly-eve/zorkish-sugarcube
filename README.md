@@ -4,7 +4,7 @@
 
 This is a work in progress macro/system to use Twine 2 to make text adventure-style games (Zork etc) where the user types in the action they want to make. 
 
-The macro has the built in defaults actions of: GO, LOOK, TAKE and REMEMBER but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md#macro-sort
+The macro has the built in defaults actions of: GO, LOOK, TAKE and REMEMBER but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
 
 The code for the command input box itself is adapted from the SugarCube textbox macro
 
@@ -45,23 +45,25 @@ Here's the structure with all of the possible options for an Actionable Object:
   	name: "it", // String: The name used in text and for inventory
   	keywords: [], // Array : The object's nicknames to identify it in a command
   	possibleActions: {
-      		go: false, // String : Passage name, doesn't work unless isPassage is true
-      		look: "Nothing special about it.", // String : Description of what you see
-      		take: {
-            enabled: false, // Boolean : Whether you can take or not
-            description: "You take it.", // String : Custom description of taking if enabled is true (optional)
-            disabledDescription: "You can't take it.", // String : Custom description if enabled is false, default is false
-          },
-      		remember: {
-            description: "You will never forget it.", // String: Message to display when remembering
-            runfunction: false, // Function: function to run
-          	},
-      		customactions: { // You can have as many as you want
-        		customaction1: {
-              actionkeywords: [], // Array: the actions identifying keywords. Example: ["sniff", "smell", "snort"]
-              description: "You do the thing", // String: message to display when triggering action									runfunction: false // Function: to run
-            }
-          }
+      go: false, // String : Passage name, doesn't work unless isPassage is true
+      look: "Nothing special about it.", // String : Description of what you see
+      take: {
+        enabled: false, // Boolean : Whether you can take or not
+        description: "You take it.", // String : Custom description of taking if enabled is true (optional)
+        disabledDescription: "You can't take it.", // String : Custom description if enabled is false, default is false
+      },
+      remember: {
+        description: "You will never forget it.", // String: Message to display when remembering
+        inventory: "memorybank",
+        runfunction: false, // Function: function to run
+      },
+      customactions: { // You can have as many as you want
+        customaction1: {
+          actionkeywords: [], // Array: the actions identifying keywords. Example: ["sniff", "smell", "snort"]
+          description: "You do the thing", // String: message to display when triggering action
+          runfunction: false // Function: to run
+        }
+      }
     }
 } >>
 ```
@@ -97,9 +99,9 @@ Next is `keywords` which defines every word that user might refer to your object
     name: 'book',
     keywords: ['book', 'paperback'],
     possibleActions: {
-      			look: "The book looks heavy, dusty, and old.",
-        }
-}>>
+      look: "The book looks heavy, dusty, and old.",
+    }
+} >>
 ```
 
 The `look` action takes only one value which is the text to display when activated on the object. The words `examine` and `check` will also activate this action.
@@ -111,13 +113,14 @@ The `look` action takes only one value which is the text to display when activat
     name: 'dagger',
     keywords: ['blade', 'knife'],
     possibleActions: {
-            take: {
-                enabled: true,
-                description: 'You take the dagger. You might need to stab someone, later.',
-                disabledDescription: 'The dagger melts into a puddle before your eyes.'
-                }
-        }
-}>>
+      take: {
+        enabled: true,
+        description: 'You take the dagger. You might need to stab someone, later.',
+        disabledDescription: 'The dagger melts into a puddle before your eyes.',
+        inventory: "inventory"
+      }
+    }
+} >>
 ```
 
 For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.
@@ -129,12 +132,13 @@ For `take` the first option is `enabled` which determines if you can take the ob
 		name: "a photo of a man",
     keywords: ['photo', 'picture', 'image'],
     possibleActions: {
-            remember: {
-                description: "You inspect the photograph. You will never forget those creepy eyes.",
-              	runfunction: function(){alert("I'll never forget.")}
-            	},
-        	}
-	} >>
+      remember: {
+        description: "You inspect the photograph. You will never forget those creepy eyes.",
+        inventory: "memorybank",
+        runfunction: function(){alert("I'll never forget.")}
+      }
+    }
+} >>
 ```
 
 For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object.
@@ -154,10 +158,9 @@ For the `remember` action there are two options, `description` which is the text
         eat: {
           actionkeywords: ["eat", "munch", "bite"],
           description: "It's too hot to eat and it scalds your mouth.",
-          runfunction: function(){alert("You just lost 2 hit points.")
-						}
-					}	
-        }
+          runfunction: function(){alert("You just lost 2 hit points.")}
+        }	
+      }
 	} >>
 ```
 
@@ -189,42 +192,43 @@ You're in a red room. On the table is a cherry pie, a dagger, a book and a photo
         eat: {
           actionkeywords: ["eat", "munch", "bite"],
           description: "It's too hot to eat and it scalds your mouth.",
-          runfunction: function(){alert("You just lost 2 hit points.")
-						}
-					}	
-        }
-	} >>
+          runfunction: function(){alert("You just lost 2 hit points.")}
+        }	
+      }
+} >>
 	
 <<set $photo = {
 		name: "a photo of a man",
     keywords: ['photo', 'picture', 'image'],
     possibleActions: {
-            remember: {
-                description: "You inspect the photograph. You will never forget those creepy eyes.",
-								runfunction: function(){alert("I'll never forget.")}
-            	},
-        	}
+      remember: {
+        description: "You inspect the photograph. You will never forget those creepy eyes.",
+        inventory: "memorybank",
+        runfunction: function(){alert("I'll never forget.")}
+      }
+    }
 } >>
 
 <<set $dagger = {
     name: 'dagger',
     keywords: ['blade', 'knife'],
     possibleActions: {
-            take: {
-                enabled: true,
-                description: 'You take the dagger. You might need to stab someone, later.',
-                disabledDescription: 'The dagger melts into a puddle before your eyes.'
-                }
-        }
-}>>
+      take: {
+        enabled: true,
+        description: 'You take the dagger. You might need to stab someone, later.',
+        disabledDescription: 'The dagger melts into a puddle before your eyes.',
+        inventory: "inventory"
+      }
+    }
+} >>
 
 <<set $book = {
     name: 'book',
     keywords: ['book', 'paperback'],
     possibleActions: {
-				look: "The book looks heavy, dusty, and old.",
-        }
-}>>
+      look: "The book looks heavy, dusty, and old.",
+    }
+} >>
 
 <<set $blueroom = {
     name: "The Blue Room",
