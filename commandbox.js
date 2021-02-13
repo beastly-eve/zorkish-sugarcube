@@ -2,10 +2,7 @@
 
 /* TODO: 
 
-1. Add ability to include extra keywords
-2. Split up go passage and thing commands?
 3. Adjust function and variable cases and names to match
-4. CONST variables for inventories with "take" and "remember"
 5. Add persistent actionable items, including inventory?
 6. Add in inventory actions
 7. Put custom fuctions into an object?
@@ -13,7 +10,7 @@
 9. Tweego, git and github?
 10. Validate passage code? If there are multiple keywords in conflict or missing default arguments!
 11. Get command-box html tag from varName?
-12. Allow user to set inventory that take and remember will use
+12. Change actionableSubjects from object to array?
 
 
 */
@@ -25,11 +22,10 @@ const ACTIONS = ["GO", "LOOK", "REMEMBER", "TAKE"];
 const DEFAULTSUBJECTS = ["NORTH", "SOUTH", "EAST", "WEST", "UP", "DOWN", "FOWARD", "BACKWARD"];
 const MESSAGEBOX = "#message-box";
 const COMMANDBOX = "#commandbox-command";
-const INVENTORY = "inventory";
+const TAKEINVENTORY = "inventory";
 const MEMORYBANK = "memorybank";
 
 var actionableSubjects = {};
-var persistentActionableSubjects = {}; // NOTE: change these variable names to have passage / global? (this isn't in use yet)
 
 /* Clear out actionable subjects before each passage */
 $(document).on(':passagestart', function (ev) {
@@ -51,6 +47,17 @@ jQuery.fn.shake = function() {
 function normalize(input){
     return input.toLowerCase().replace(/\s+/g, '');
 }
+
+/* Find object length */
+function ObjectLength( object ) {
+    var length = 0;
+    for( var key in object ) {
+        if( object.hasOwnProperty(key) ) {
+            ++length;
+        }
+    }
+    return length;
+};
 
 /*  Actionable Subject Object example */
 const actionableSubjectDefaults = {
@@ -181,15 +188,9 @@ function performAction(command){
                     $(MESSAGEBOX).html(subject['possibleActions']['take']['description']);
 
                     // Checks for inventory definition and adds it to inventory
-                    if(subject['possibleActions']['take']['inventory']) {
-                        let objectinventory = subject['possibleActions']['take']['inventory'];
-                        State["variables"][objectinventory]["pickUp"](subject['name']);
-                    }
-
-                    // Adds item to persistent objects
-                    let subjectslug = normalize(subject['name']);
-                    persistentActionableSubjects[subjectslug] = subject;
-
+                    let objectinventory = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                    State["variables"][objectinventory]["pickUp"](subject['name']);
+                    
                     // Reloads passage
                     Engine.play(passage());
     
@@ -209,11 +210,9 @@ function performAction(command){
                     subject['possibleActions']['remember']['runfunction']();
                 }
 
-                // Checks to see if inventory is defined and adds it to inventory 
-                if(subject['possibleActions']['take']['inventory']) {
-                    let memoryinventory = subject['possibleActions']['remember']['inventory'];
+                // Checks to see if inventory is defined and adds it to inventory, user default if not defined
+                    let memoryinventory = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
                     State["variables"][memoryinventory]["pickUp"](subject['name']);
-                }
                 break;
             
             default: 
@@ -252,20 +251,19 @@ Macro.add('passageactions', {
     handler() {
 
         let actions = this.args;
+        let definedActionsCount = ObjectLength(actionableSubjects);
+        console.log(definedActionsCount);
 
         for(let i = 0; i < actions.length; i++){
             if(typeof actions[i] === 'object' && actions[i] !== null){
-                console.log('Object found.')
-                actionableSubjects[i] = actions[i];
+                actionableSubjects[definedActionsCount] = actions[i];
+                console.log(actionableSubjects);
             } else {
                 var argtype = typeof actions[i];
                 console.log("This is not an object, it's a " + argtype);
-                console.log(actions[i]);
                 console.log('--------------');
             }
-
         }
-
     }
 });
 
@@ -347,4 +345,4 @@ Macro.add('commandbox', {
     }
 });
 
-// Include Simple Inventory System here: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md#macro-sort
+/* Include simple inventory system */

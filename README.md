@@ -174,8 +174,8 @@ This is a feature that hasn't been added yet.
 
 Below is an example of what a passage might look like with this code.
 
-```
-You're in a red room. On the table is a cherry pie, a dagger, a book and a photo of a man. There's a blue door that leads to the blue room.
+```javascript
+You sre in a red room. On the table is a cherry pie, a dagger, a book and a photo of a man. There is a blue door that leads to the blue room.
 
 <div id="message-box" style="height: 35px"></div>
 <<commandbox "$command">>
@@ -240,4 +240,38 @@ You're in a red room. On the table is a cherry pie, a dagger, a book and a photo
 
 <<passageactions $pie $photo $book $dagger $blueroom>>
 ```
+
+### Persistent Actionable Objects/Inventory Actionable Objects
+
+If you want to add persistent actionable objects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
+
+This includes actions on inventory items, so if you have an inventory item that you want actionable when it's in the inventory use code like this in your PassageFooter.
+
+```javascript
+<<if $inventory.has('a cherry pie')>>
+<<set $pie = {
+    name: "a cherry pie",
+    keywords: ['cherry pie', 'pie', 'tasty pie'],
+    possibleActions: {
+            look: "The pie is a bit squished from being in your pocket.",
+			customactions: {
+				smell: {
+						actionkeywords: ["sniff", "smell", "snort"],
+						description: "It smells fruity and tasty.",
+						},
+				eat: {
+						actionkeywords: ["eat", "munch", "bite"],
+						description: "It's too hot to eat.",
+					}
+				}
+        	}
+	} >>\
+<</if>>\
+
+<<passageactions $myself $pie>>\
+```
+
+This action will overwrite any actions already associated with $pie in the current passage, so it's best to use the same variable.
+
+If, alternatively, you DON'T want an object in your inventory to be actionable, make sure to surround its definition in an  `<<if>>` statement in the current passage.
 
