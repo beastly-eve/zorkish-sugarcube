@@ -2,6 +2,8 @@
 
 /* TODO: 
 
+1. Add DROP default action
+2. Test for in inventory before performing TAKE
 3. Adjust function and variable cases and names to match
 5. Add persistent actionable items, including inventory?
 6. Add in inventory actions
@@ -11,6 +13,11 @@
 10. Validate passage code? If there are multiple keywords in conflict or missing default arguments!
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
+13. Make in inventory test function?
+14. DROPping and FORGETting must remove persistent object from actionableSubjects?
+15. Config option to reload passages on inventory updating?
+16. Error for inventory not existing?
+17. Set additonal keywords for default actions in config?
 
 
 */
@@ -18,8 +25,7 @@
 /* Setting up the actional subjects object and default values */
 
 // CONFIG
-const ACTIONS = ["GO", "LOOK", "REMEMBER", "TAKE"];
-const DEFAULTSUBJECTS = ["NORTH", "SOUTH", "EAST", "WEST", "UP", "DOWN", "FOWARD", "BACKWARD"];
+const ACTIONS = ['GO', 'LOOK', 'REMEMBER', 'TAKE', 'DROP', 'FORGET'];
 const MESSAGEBOX = "#message-box";
 const COMMANDBOX = "#commandbox-command";
 const TAKEINVENTORY = "inventory";
@@ -63,9 +69,8 @@ function ObjectLength( object ) {
 const actionableSubjectDefaults = {
         name: "it", // String: The name used in text and for inventory
         keywords: [], // Array : The object's nicknames to identify it in a command
-        isPassage: false, // Boolean : This is to validate the "GO" action
         possibleActions: {
-            go: false, // String : Passage name, doesn't work unless isPassage is true
+            go: false, // String : Passage name
             look: "Nothing special about it.", // String : Description of what you see
             take: {
                     enabled: false, // Boolean : Whether you can take or not
@@ -93,9 +98,12 @@ function getAction(commandpromptinput){
     // Make command lowercase and remove everything after first word
     let commandAction = commandpromptinput.toLowerCase().replace(/ .*/,'');
 
-    if(commandAction === "go" || commandAction === "take" || commandAction === "remember"){
+    if(commandAction === "go" || commandAction === "remember" || commandAction === "drop" || commandAction === "forget"){
         return commandAction;
 
+    } else if(commandAction === "take" || commandAction === "pick") {
+        return 'take';
+    
     } else if(commandAction === "look" || commandAction === "examine" || commandAction === "check") {
         return "look";
 
@@ -156,8 +164,22 @@ function isValidCommand(action, subject, actionableSubjects){
     if(subject){
         if(subject['possibleActions'][action]) {
             return true;
+
         } else if(getCustomAction(action, subject, actionableSubjects)){
             return true;
+            
+        } else if(action == "drop" || action == "forget"){
+            let subjectInventory = subject['possibleActions']['take']['inventory'];
+            let subjectMemoryBank = subject['possibleActions']['remember']['inventory'];
+
+            if(State["variables"][subjectInventory].has(subject['name']) || State["variables"][subjectMemoryBank].has(subject['name'])){
+                console.log("Valid because in inventory and action is DROP or FORGET");
+                return true;
+
+            } else {
+                return false;
+            }
+
         } else {
             return false;
         }
@@ -190,7 +212,7 @@ function performAction(command){
                     // Checks for inventory definition and adds it to inventory
                     let objectinventory = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
                     State["variables"][objectinventory]["pickUp"](subject['name']);
-                    
+
                     // Reloads passage
                     Engine.play(passage());
     
@@ -211,10 +233,30 @@ function performAction(command){
                 }
 
                 // Checks to see if inventory is defined and adds it to inventory, user default if not defined
-                    let memoryinventory = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
-                    State["variables"][memoryinventory]["pickUp"](subject['name']);
+                let memoryinventory = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                State["variables"][memoryinventory]["pickUp"](subject['name']);
+                break;
+
+            case 'drop':
+                $(MESSAGEBOX).html('You drop it.');
+
+                let objectinventory4drop = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                console.log('Inventory: ' + objectinventory4drop);
+                console.log('Name: ' + subject['name']);
+
+                State["variables"][objectinventory4drop]["drop"](subject['name']);
+
+                // Reloads passage
+                Engine.play(passage());
                 break;
             
+            case 'forget':
+                $(MESSAGEBOX).html('It\'s forgotten.');
+
+                let memoryinventory4forget = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                State["variables"][memoryinventory4forget]["drop"](subject['name']);
+                break;
+
             default: 
                 let customaction = getCustomAction(action, subject, actionableSubjects);
 
@@ -263,6 +305,7 @@ Macro.add('passageactions', {
                 console.log("This is not an object, it's a " + argtype);
                 console.log('--------------');
             }
+            definedActionsCount++;
         }
     }
 });
@@ -344,5 +387,3 @@ Macro.add('commandbox', {
         State.setVar(varName, "");
     }
 });
-
-/* Include simple inventory system */

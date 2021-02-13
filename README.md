@@ -26,7 +26,7 @@ For the command box to do anything, you need to define what is actionable in you
 
 `<<passageactions $actionableobject1 $actionableobject2>>`
 
-This tag can take as many variables as Actionable Objects you define. It is required for each passage that uses this system. How to set the object's options is in the Defining Objects and Actions section below.
+This tag can take as many variables as Actionable Objects you define. It is required for each passage that uses this system. An empty variable will be ignored. How to set the object's options is in the Defining Objects and Actions section below. 
 
 #### Message Box Element
 
@@ -77,7 +77,7 @@ That probably looks like a lot so we'll do some simple examples.
 ```javascript
 <<set $blueroom = {
     name: "The Blue Room",
-    keywords: ['the blue room', 'blue room', 'room', 'through door'],
+    keywords: ['the blue room', 'blue room', 'room', 'through door', 'north'],
     possibleActions: {
         go: "blue room",
     }
@@ -86,7 +86,7 @@ That probably looks like a lot so we'll do some simple examples.
 
 We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and will be the name that will be added to in inventories. In this case, the object is a room/passage, so it should not be added to inventories, unless you're doing something really experimental.
 
-Next is `keywords` which defines every word that user might refer to your object as. The system will search through the user's command for one of these phrases to determine if they want to do something to this object.
+Next is `keywords` which defines every word that user might refer to your object as. The system will search through the user's command for one of these phrases to determine if they want to do something to this object. If you want the user to be able to enter `Go north` or `Go up` etc to go to your room/passage include north/up in your keywords.
 
 `possibleActions` is where you define the actions the user can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
 
@@ -142,6 +142,10 @@ For `take` the first option is `enabled` which determines if you can take the ob
 ```
 
 For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory.
+
+#### Drop & Forget
+
+The `DROP` and `FORGET` actions are enabled for every item you can `TAKE` and `REMEMBER` respectively.
 
 ### Custom actions
 
@@ -245,7 +249,9 @@ You sre in a red room. On the table is a cherry pie, a dagger, a book and a phot
 
 If you want to add persistent actionable objects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
 
-This includes actions on inventory items, so if you have an inventory item that you want actionable when it's in the inventory use code like this in your PassageFooter.
+This includes actions on inventory items, so if you have an inventory item that you want actionable (including being able to DROP it or FORGET it) when it's in the inventory use code like this in your PassageFooter. Include a separate `passageactions` inside the `if` statement that checks if each inventory item is in the inventory.
+
+In general, you should make one of these for every inventory item or your game may behave a little strangely.
 
 ```javascript
 <<if $inventory.has('a cherry pie')>>
@@ -266,12 +272,11 @@ This includes actions on inventory items, so if you have an inventory item that 
 				}
         	}
 	} >>\
+  <<passageactions $pie>>\
 <</if>>\
-
-<<passageactions $myself $pie>>\
 ```
 
 This action will overwrite any actions already associated with $pie in the current passage, so it's best to use the same variable.
 
-If, alternatively, you DON'T want an object in your inventory to be actionable, make sure to surround its definition in an  `<<if>>` statement in the current passage.
+If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
 
