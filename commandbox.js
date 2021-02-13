@@ -205,17 +205,23 @@ function performAction(command){
                 break;
 
             case 'take':
+                let objectinventory = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+
                 if(subject['possibleActions']['take']['enabled']){
-                    // Prints description text
-                    $(MESSAGEBOX).html(subject['possibleActions']['take']['description']);
+                    if(!State["variables"][objectinventory].has((subject['name']))){
+                         // Prints description text
+                        $(MESSAGEBOX).html(subject['possibleActions']['take']['description']);
 
-                    // Checks for inventory definition and adds it to inventory
-                    let objectinventory = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
-                    State["variables"][objectinventory]["pickUp"](subject['name']);
+                        // Checks for inventory definition and adds it to inventory
+                        State["variables"][objectinventory]["pickUp"](subject['name']);
 
-                    // Reloads passage
-                    Engine.play(passage());
-    
+                        // Reloads passage
+                        Engine.play(passage());
+                    } else {
+                        // If a valid command is not found, shake the commandbox as an error
+                        $(COMMANDBOX).shake();
+                    }
+                   
                 } else {
                     // Prints disabled description text
                     $(MESSAGEBOX).html(subject['possibleActions']['take']['disabledDescription']);
