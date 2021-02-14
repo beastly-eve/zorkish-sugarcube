@@ -360,3 +360,4 @@ In general, you should make one of these for every inventory item or your game m
 This action will overwrite any actions already associated with $pie in the current passage, so it's best to use the same variable.
 
 If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
+
