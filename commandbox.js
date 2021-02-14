@@ -129,12 +129,11 @@ function getSubject(command, actionableSubjects){
         // Cycle through the different names/keywords for each subject
         for(let i = 0; i < actionableSubjects[key]['keywords'].length; i++){
             // Test if user command contains any of the subject's names/keywords 
-            if(command.includes(actionableSubjects[key]['keywords'][i])){
+            if(command.includes(actionableSubjects[key]['keywords'][i]) && $.inArray(actionableSubjects[key], foundSubjects) === -1){
                 foundSubjects.push(actionableSubjects[key]);
             }
         }
     }
-    console.log(foundSubjects);
     return foundSubjects;
 }
 
