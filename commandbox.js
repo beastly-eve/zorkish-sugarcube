@@ -2,22 +2,21 @@
 
 /* TODO: 
 
-1. Add DROP default action
-2. Test for in inventory before performing TAKE
+1. USE action ("Use key on door")
+
 3. Adjust function and variable cases and names to match
-5. Add persistent actionable items, including inventory?
-6. Add in inventory actions
+
 7. Put custom fuctions into an object?
 8. Make code better, break up into more functions
 9. Tweego, git and github?
-10. Validate passage code? If there are multiple keywords in conflict or missing default arguments!
+10. Error handling and Validate passage code? If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
-13. Make in inventory test function?
-14. DROPping and FORGETting must remove persistent object from actionableSubjects?
+
 15. Config option to reload passages on inventory updating?
-16. Error for inventory not existing?
+
 17. Set additonal keywords for default actions in config?
+18. Make subjects not case sensitive
 
 
 */
@@ -83,6 +82,13 @@ const actionableSubjectDefaults = {
                     inventory: "memorybank", // String : name of the inventory to store it
                     runfunction: false, // Function: function to run
                 },
+            use: {
+                useonitem1: {
+                    name: "item to use on it", // String: Name that matches the item that can be used on/with this item
+                    description: "You use the item on it.", // String: Text to display
+                    runfunction: false, // Function: Function to run
+                }
+            },
             customactions: { // You can have as many as you want
                 customaction1: {
                         actionkeywords: [], // Array: the actions identifying keywords. Example: ["sniff", "smell", "snort"]
@@ -98,7 +104,7 @@ function getAction(commandpromptinput){
     // Make command lowercase and remove everything after first word
     let commandAction = commandpromptinput.toLowerCase().replace(/ .*/,'');
 
-    if(commandAction === "go" || commandAction === "remember" || commandAction === "drop" || commandAction === "forget"){
+    if(commandAction === "go" || commandAction === "remember" || commandAction === "drop" || commandAction === "forget" || commandAction === "use"){
         return commandAction;
 
     } else if(commandAction === "take" || commandAction === "pick") {
@@ -115,18 +121,21 @@ function getAction(commandpromptinput){
 }
 
 function getSubject(command, actionableSubjects){
+    command = command.toLowerCase();
+    let foundSubjects = [];
+
     // Cycle through the passages subjects
     for (let key in actionableSubjects) {
         // Cycle through the different names/keywords for each subject
         for(let i = 0; i < actionableSubjects[key]['keywords'].length; i++){
             // Test if user command contains any of the subject's names/keywords 
             if(command.includes(actionableSubjects[key]['keywords'][i])){
-                
-                return actionableSubjects[key];
+                foundSubjects.push(actionableSubjects[key]);
             }
         }
     }
-
+    console.log(foundSubjects);
+    return foundSubjects;
 }
 
 function getCustomAction(action, subject, actionableSubjects){
@@ -160,19 +169,20 @@ function getCustomAction(action, subject, actionableSubjects){
 }
 
 function isValidCommand(action, subject, actionableSubjects){
+    console.log("Action is " + action + ", array length is " + subject.length);
     // Test if the subject exists and if the action associated is defined
-    if(subject){
-        if(subject['possibleActions'][action]) {
+    if(subject.length === 1){
+        if(subject[0]['possibleActions'][action]) {
             return true;
 
         } else if(getCustomAction(action, subject, actionableSubjects)){
             return true;
             
         } else if(action == "drop" || action == "forget"){
-            let subjectInventory = subject['possibleActions']['take']['inventory'];
-            let subjectMemoryBank = subject['possibleActions']['remember']['inventory'];
+            let subjectInventory = subject[0]['possibleActions']['take']['inventory'];
+            let subjectMemoryBank = subject[0]['possibleActions']['remember']['inventory'];
 
-            if(State["variables"][subjectInventory].has(subject['name']) || State["variables"][subjectMemoryBank].has(subject['name'])){
+            if(State["variables"][subjectInventory].has(subject[0]['name']) || State["variables"][subjectMemoryBank].has(subject[0]['name'])){
                 console.log("Valid because in inventory and action is DROP or FORGET");
                 return true;
 
@@ -183,8 +193,17 @@ function isValidCommand(action, subject, actionableSubjects){
         } else {
             return false;
         }
+    } else if(subject.length === 2 && action === 'use'){
+        console.log('Two subjects detected');
+        return true;
+
+    } else {
+        return false;
     }
-    return false;
+}
+
+function validateUse(command, subject){
+
 }
 
 function performAction(command){
@@ -196,24 +215,24 @@ function performAction(command){
         switch(action){
             case 'go': 
                 // Goes to defined passage
-                Engine.play(subject['possibleActions']['go']);
+                Engine.play(subject[0]['possibleActions']['go']);
                 break;
 
             case 'look': 
                 // Prints description text
-                $(MESSAGEBOX).html(subject['possibleActions']['look']);
+                $(MESSAGEBOX).html(subject[0]['possibleActions']['look']);
                 break;
 
             case 'take':
-                let objectinventory = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let objectinventory = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
 
-                if(subject['possibleActions']['take']['enabled']){
-                    if(!State["variables"][objectinventory].has((subject['name']))){
+                if(subject[0]['possibleActions']['take']['enabled']){
+                    if(!State["variables"][objectinventory].has((subject[0]['name']))){
                          // Prints description text
-                        $(MESSAGEBOX).html(subject['possibleActions']['take']['description']);
+                        $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['description']);
 
                         // Checks for inventory definition and adds it to inventory
-                        State["variables"][objectinventory]["pickUp"](subject['name']);
+                        State["variables"][objectinventory]["pickUp"](subject[0]['name']);
 
                         // Reloads passage
                         Engine.play(passage());
@@ -224,33 +243,33 @@ function performAction(command){
                    
                 } else {
                     // Prints disabled description text
-                    $(MESSAGEBOX).html(subject['possibleActions']['take']['disabledDescription']);
+                    $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['disabledDescription']);
                     
                 }
                 break;
 
             case 'remember':
                 // Prints description text
-                $(MESSAGEBOX).html(subject['possibleActions']['remember']['description']);
+                $(MESSAGEBOX).html(subject[0]['possibleActions']['remember']['description']);
 
                 // If there's a function defined, run it
-                if(subject['possibleActions']['remember']['runfunction']){
-                    subject['possibleActions']['remember']['runfunction']();
+                if(subject[0]['possibleActions']['remember']['runfunction']){
+                    subject[0]['possibleActions']['remember']['runfunction']();
                 }
 
                 // Checks to see if inventory is defined and adds it to inventory, user default if not defined
-                let memoryinventory = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
-                State["variables"][memoryinventory]["pickUp"](subject['name']);
+                let memoryinventory = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                State["variables"][memoryinventory]["pickUp"](subject[0]['name']);
                 break;
 
             case 'drop':
                 $(MESSAGEBOX).html('You drop it.');
 
-                let objectinventory4drop = subject['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let objectinventory4drop = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
                 console.log('Inventory: ' + objectinventory4drop);
-                console.log('Name: ' + subject['name']);
+                console.log('Name: ' + subject[0]['name']);
 
-                State["variables"][objectinventory4drop]["drop"](subject['name']);
+                State["variables"][objectinventory4drop]["drop"](subject[0]['name']);
 
                 // Reloads passage
                 Engine.play(passage());
@@ -259,12 +278,16 @@ function performAction(command){
             case 'forget':
                 $(MESSAGEBOX).html('It\'s forgotten.');
 
-                let memoryinventory4forget = subject['possibleActions']['remember']['inventory'] || MEMORYBANK;
-                State["variables"][memoryinventory4forget]["drop"](subject['name']);
+                let memoryinventory4forget = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                State["variables"][memoryinventory4forget]["drop"](subject[0]['name']);
+                break;
+            
+            case 'use':
+                console.log("Use command activated.");
                 break;
 
             default: 
-                let customaction = getCustomAction(action, subject, actionableSubjects);
+                let customaction = getCustomAction(action, subject[0], actionableSubjects);
 
                 // Prints description text
                 $(MESSAGEBOX).html(customaction[0]);
@@ -285,6 +308,9 @@ function performAction(command){
 
 }
 
+setup.testFunction = function(){
+    console.log('Test function run');
+}
 
 /*
 ----------------------------
@@ -300,12 +326,11 @@ Macro.add('passageactions', {
 
         let actions = this.args;
         let definedActionsCount = ObjectLength(actionableSubjects);
-        console.log(definedActionsCount);
 
         for(let i = 0; i < actions.length; i++){
             if(typeof actions[i] === 'object' && actions[i] !== null){
                 actionableSubjects[definedActionsCount] = actions[i];
-                console.log(actionableSubjects);
+
             } else {
                 var argtype = typeof actions[i];
                 console.log("This is not an object, it's a " + argtype);
