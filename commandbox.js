@@ -1,4 +1,33 @@
-/* Text Adventure Command Input macro for SugarCube 2 */
+/*
+
+ ________  ________  ________  ___  __    ___  ________  ___  ___                             
+|\_____  \|\   __  \|\   __  \|\  \|\  \ |\  \|\   ____\|\  \|\  \                            
+ \|___/  /\ \  \|\  \ \  \|\  \ \  \/  /|\ \  \ \  \___|\ \  \\\  \                           
+     /  / /\ \  \\\  \ \   _  _\ \   ___  \ \  \ \_____  \ \   __  \                          
+    /  /_/__\ \  \\\  \ \  \\  \\ \  \\ \  \ \  \|____|\  \ \  \ \  \                         
+   |\________\ \_______\ \__\\ _\\ \__\\ \__\ \__\____\_\  \ \__\ \__\                        
+    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\_________\|__|\|__|                        
+                                                 \|_________|                                 
+                                                                                              
+                                                                                              
+ ________  ___  ___  ________  ________  ________  ________  ___  ___  ________  _______      
+|\   ____\|\  \|\  \|\   ____\|\   __  \|\   __  \|\   ____\|\  \|\  \|\   __  \|\  ___ \     
+\ \  \___|\ \  \\\  \ \  \___|\ \  \|\  \ \  \|\  \ \  \___|\ \  \\\  \ \  \|\ /\ \   __/|    
+ \ \_____  \ \  \\\  \ \  \  __\ \   __  \ \   _  _\ \  \    \ \  \\\  \ \   __  \ \  \_|/__  
+  \|____|\  \ \  \\\  \ \  \|\  \ \  \ \  \ \  \\  \\ \  \____\ \  \\\  \ \  \|\  \ \  \_|\ \ 
+    ____\_\  \ \_______\ \_______\ \__\ \__\ \__\\ _\\ \_______\ \_______\ \_______\ \_______\
+   |\_________\|_______|\|_______|\|__|\|__|\|__|\|__|\|_______|\|_______|\|_______|\|_______|
+   \|_________|                                                                               
+                                                                                              
+                                                                                            
+
+Text Adventure Command Input macro for SugarCube 2 
+
+This is a work in progress macro/system to use Twine 2 to make text adventure-style games (Zork etc) where the user types in the action they want to make. 
+
+The macro has the built in defaults actions of: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
+
+The code for the command input box itself is adapted from the SugarCube textbox macro
 
 /* TODO: 
 
@@ -25,19 +54,33 @@
 23. Look at pie doesn't work while in pocket anymore -> drop, remember either
 
 24. Add "Go Back?"
-
+25. Add more comments to code
+26. Add option for runfunction on every action?
+27. Config option to refresh passage for inventory and remember
 
 */
 
 /* Setting up the actional subjects object and default values */
 
-// CONFIG
-const ACTIONS = ['GO', 'LOOK', 'REMEMBER', 'TAKE', 'DROP', 'FORGET'];
+/* 
+---------------------------------------------
+Config (these don't really do much right now)
+----------------------------------------------
+*/
+
+
 const MESSAGEBOX = "#message-box";
 const COMMANDBOX = "#commandbox-command";
 const TAKEINVENTORY = "inventory";
 const MEMORYBANK = "memorybank";
 
+/* 
+-------------------------------
+Setup and Utility Functions
+-------------------------------
+*/
+
+/* This object will fill with the detected subjects you can perform actions in each passage */
 var actionableSubjects = {};
 
 /* Clear out actionable subjects before each passage */
@@ -107,7 +150,13 @@ const actionableSubjectDefaults = {
         }
 }
 
-/* Parsing functions */
+/* 
+-------------------------------
+Functions for Parsing and Performing actions 
+-------------------------------
+*/
+
+// Seperates the action from the beginning of the sentence and returns a normalized version
 function getAction(commandpromptinput){
     // Make command lowercase and remove everything after first word
     let commandAction = commandpromptinput.toLowerCase().replace(/ .*/,'');
@@ -128,7 +177,9 @@ function getAction(commandpromptinput){
 
 }
 
+// Gets the different subjects in the command
 function getSubject(command, actionableSubjects){
+    // Set variable to command with action (first word) removed
     let actionlessCommand = command.substr(command.indexOf(" ") + 1).toLowerCase();
     let foundSubjects = [];
     let foundSubjectsNames = [];
@@ -137,9 +188,12 @@ function getSubject(command, actionableSubjects){
     for (let key in actionableSubjects) {
         // Cycle through the different names/keywords for each subject
         for(let i = 0; i < actionableSubjects[key]['keywords'].length; i++){
-            // Test if user command contains any of the subject's names/keywords 
+            // Test if user command contains any of the subject's names/keywords and is not already found in the array to be returned
             if(actionlessCommand.includes(actionableSubjects[key]['keywords'][i]) && $.inArray(actionableSubjects[key]['name'], foundSubjectsNames) === -1){
+                // Add to array to check if already queued up to be returned
                 foundSubjectsNames.push(actionableSubjects[key]['name']);
+
+                //The array that will be returned with the detected subjects
                 foundSubjects.push(actionableSubjects[key]);
             }
         }
@@ -147,6 +201,7 @@ function getSubject(command, actionableSubjects){
     return foundSubjects;
 }
 
+// Gets the custom action referenced in the command and returns it's properties, also used for command validation
 function getCustomAction(action, subject, actionableSubjects){
     // Cycle through the subjects in the passage to see if they match the subject of the command
     for (let key in actionableSubjects) {
@@ -177,24 +232,21 @@ function getCustomAction(action, subject, actionableSubjects){
     return false;
 }
 
+// Gets the use action related to the subjects, also used for command validation
 function getUseAction(subject, action){
-    console.log('Subjects for use action:');
-    console.log(subject);
-    console.log('possibleActions');
     if(action == 'use'){
-            for(let key in subject[0]['possibleActions']['use']){
+        // Check first subject's use definitions to see if any of them match second subject's name
+        for(let key in subject[0]['possibleActions']['use']){
+            // Return use action properties if match found
             if(subject[0]['possibleActions']['use'][key]['name'] === subject[1]['name']){
-                    console.log('Matched use found:');
-                    console.log(subject[0]['possibleActions']['use'][key]);
-
                     return subject[0]['possibleActions']['use'][key];
             }
         }
 
+        // Check second subject's use definitions to see if any of them match first subject's name
         for(let key in subject[1]['possibleActions']['use']){
+            // Return use action properties if match found
             if(subject[1]['possibleActions']['use'][key]['name'] === subject[0]['name']){
-                console.log('Matched use found:');
-                console.log(subject[1]['possibleActions']['use'][key]);
 
                 return subject[1]['possibleActions']['use'][key];
             }
@@ -208,75 +260,47 @@ function getUseAction(subject, action){
 }
 
 function isValidCommand(action, subject, actionableSubjects){
-    console.log("Action is " + action + ", array length is " + subject.length);
-    // Test if the subject exists and if the action associated is defined
-    console.log(subject);
+    
+    // Check to see if multiple subjects returned (multiple subjects are relevent for 'USE' command or the command will be rejected)
     if(subject.length === 1){
+        // Test if the subject exists in possibleActions and if the action associated is defined
         if(subject[0]['possibleActions'][action]) {
             return true;
-
+        
+        // If the action isn't defined in possibleActions, check to see if it's a custom action
         } else if(getCustomAction(action, subject, actionableSubjects)){
             return true;
-            
+        
+        // Drop and Forget are never defined, validate them based on whether subject is in inventory
         } else if(action == "drop" || action == "forget"){
             let subjectInventory = subject[0]['possibleActions']['take']['inventory'];
             let subjectMemoryBank = subject[0]['possibleActions']['remember']['inventory'];
 
+            // Test if subject is in either the memory inventory or subject inventory TODO: Go through every inventory defined by inventory macro so more than two inventories can be used
             if(State["variables"][subjectInventory].has(subject[0]['name']) || State["variables"][subjectMemoryBank].has(subject[0]['name'])){
-                console.log("Valid because in inventory and action is DROP or FORGET");
                 return true;
 
             } else {
-                console.log('Failed inventory check for DROP and FORGET');
                 return false;
             }
 
         } else {
-            console.log('Action failed DROP and FORGET validation');
             return false;
         }
+    // If there are more than one subject, use the getUseAction function to validate the action USE against the command
     } else if(subject.length === 2 && action === 'use' && getUseAction(subject, action)){
         return true;
 
     } else {
-        console.log("Failed at USE validation")
         return false;
     }
-}
-
-
-function isValidCommandOld(action, subject, actionableSubjects){
-    // Test if the subject exists and if the action associated is defined
-    if(subject){
-        if(subject['possibleActions'][action]) {
-            return true;
-
-        } else if(getCustomAction(action, subject, actionableSubjects)){
-            return true;
-            
-        } else if(action == "drop" || action == "forget"){
-            let subjectInventory = subject['possibleActions']['take']['inventory'];
-            let subjectMemoryBank = subject['possibleActions']['remember']['inventory'];
-
-            if(State["variables"][subjectInventory].has(subject['name']) || State["variables"][subjectMemoryBank].has(subject['name'])){
-                console.log("Valid because in inventory and action is DROP or FORGET");
-                return true;
-
-            } else {
-                return false;
-            }
-
-        } else {
-            return false;
-        }
-    }
-    return false;
 }
 
 function performAction(command){
     var action = getAction(command);
     var subject = getSubject(command, actionableSubjects);
 
+    // Check if the command is valid
     if(isValidCommand(action, subject, actionableSubjects)){
 
         switch(action){
@@ -332,10 +356,9 @@ function performAction(command){
             case 'drop':
                 $(MESSAGEBOX).html('You drop it.');
 
+                // Get the inventory the subject is a part of
                 let objectinventory4drop = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
-                console.log('Inventory: ' + objectinventory4drop);
-                console.log('Name: ' + subject[0]['name']);
-
+                // Drop the subject from inventory
                 State["variables"][objectinventory4drop]["drop"](subject[0]['name']);
 
                 // Reloads passage
@@ -345,12 +368,13 @@ function performAction(command){
             case 'forget':
                 $(MESSAGEBOX).html('It\'s forgotten.');
 
+                // Get the inventory the subject is a part of
                 let memoryinventory4forget = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                // Drop the subject from inventory
                 State["variables"][memoryinventory4forget]["drop"](subject[0]['name']);
                 break;
             
             case 'use':
-                console.log("Use command true.");
                 let useAction = getUseAction(subject, action);
 
                 $(MESSAGEBOX).html(useAction['description']);

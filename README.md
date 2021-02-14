@@ -57,6 +57,13 @@ Here's the structure with all of the possible options for an Actionable Object:
         inventory: "memorybank",
         runfunction: false, // Function: function to run
       },
+      use: {
+        useonitem1: {
+          name: "item to use on it", // String: Name that matches the item that can be used on/with this item
+          description: "You use the item on it.", // String: Text to display
+          runfunction: false, // Function: Function to run
+        }
+      },
       customactions: { // You can have as many as you want
         customaction1: {
           actionkeywords: [], // Array: the actions identifying keywords. Example: ["sniff", "smell", "snort"]
@@ -175,7 +182,7 @@ For the `remember` action there are two options, `description` which is the text
 <<passageactions $voodoodoll>>
 ```
 
-The `use` action allows you to have a valid command with two objects. In an objects you define the other objects available that can be used on it. So if you can use a `dagger` on a`voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. The `use` account can trigger a `description` and run a function.
+The `use` action allows you to have a valid command with two objects. In an objects you define the other objects available that can be used on it. So if you can use a `dagger` on a`voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
 
 #### Drop & Forget
 
