@@ -203,6 +203,7 @@ function getSubject(command, actionableSubjects){
 
 // Gets the custom action referenced in the command and returns it's properties, also used for command validation
 function getCustomAction(action, subject, actionableSubjects){
+
     // Cycle through the subjects in the passage to see if they match the subject of the command
     for (let key in actionableSubjects) {
         if(actionableSubjects[key]['name'] === subject['name']){
@@ -268,7 +269,7 @@ function isValidCommand(action, subject, actionableSubjects){
             return true;
         
         // If the action isn't defined in possibleActions, check to see if it's a custom action
-        } else if(getCustomAction(action, subject, actionableSubjects)){
+        } else if(getCustomAction(action, subject[0], actionableSubjects)){
             return true;
         
         // Drop and Forget are never defined, validate them based on whether subject is in inventory
@@ -517,3 +518,7 @@ Macro.add('commandbox', {
         State.setVar(varName, "");
     }
 });
+
+/*
+SIMPLE INVENTORY SYSTEM GOES HERE
+*/
