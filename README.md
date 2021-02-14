@@ -4,7 +4,7 @@
 
 This is a work in progress macro/system to use Twine 2 to make text adventure-style games (Zork etc) where the user types in the action they want to make. 
 
-The macro has the built in defaults actions of: GO, LOOK, TAKE and REMEMBER but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
+The macro has the built in defaults actions of: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
 
 The code for the command input box itself is adapted from the SugarCube textbox macro
 
@@ -158,19 +158,19 @@ For the `remember` action there are two options, `description` which is the text
     name: "a voodoo doll",
     keywords: ['voodoo doll', 'doll'],
     possibleActions: {
-			use: {
-				dagger: {
+      use: {
+        dagger: {
           name: "dagger",
           description: "You poke the doll with the dagger. Ouch! It hurts you.",
         },
-				book: {
-					name: 'book',
-					description: "You look up about the doll in the book which tells you it's name is Gary.",
-					runfunction: function(){alert("Gary. That's your name!")}
+        book: {
+          name: 'book',
+          description: "You look up about the doll in the book which tells you it's name is Gary.",
+          runfunction: function(){alert("Gary. That's your name!")}
         }
       }
     }
-	} >>
+} >>
   
 <<passageactions $voodoodoll>>
 ```
@@ -217,15 +217,15 @@ setup.yourFunction = function(){
 
 /* In your passage */
 <<set $photo = {
-  	name: "a photo of a man",
-    keywords: ['photo', 'picture', 'image'],
-    possibleActions: {
-      remember: {
-        description: "You inspect the photograph. You will never forget those creepy eyes.",
-        inventory: "memorybank",
-        runfunction: setup.yourFunction // Here it is!
-      }
+  name: "a photo of a man",
+  keywords: ['photo', 'picture', 'image'],
+  possibleActions: {
+    remember: {
+      description: "You inspect the photograph. You will never forget those creepy eyes.",
+      inventory: "memorybank",
+      runfunction: setup.yourFunction // Here it is!
     }
+  }
 } >>
   
 <<passageactions $photo>>

@@ -2,27 +2,30 @@
 
 /* TODO: 
 
-1.
+1. USE action ("Use key on door")
 
-3. Adjust function and variable cases and names to match, clear up terminology subject vs object (object should probably stay a JS term)
+3. Adjust function and variable cases and names to match
 
 7. Put custom fuctions into an object?
-
-10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other? Validate for user: "You didn't begin with an action"
+8. Make code better, break up into more functions
+9. Tweego, git and github?
+10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other?
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
 
 15. Config option to reload passages on inventory updating?
 
 17. Set additonal keywords for default actions in config?
-
+18. Make subjects not case sensitive
 19. getCustomAction return sub-object from subject instead of array
-
+20. Clear up terminology subject vs object (object should probably stay a JS term)
 21. Order USE subjects based on command?
+22. Validate for user: "You didn't begin with an action"
 
 23. Look at pie doesn't work while in pocket anymore -> drop, remember either
+
 24. Add "Go Back?"
-25. Make "default commands" option (in config?)
+
 
 */
 
