@@ -9,7 +9,7 @@
 7. Put custom fuctions into an object?
 8. Make code better, break up into more functions
 9. Tweego, git and github?
-10. Error handling and Validate passage code? If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?
+10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other?
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
 
@@ -17,6 +17,14 @@
 
 17. Set additonal keywords for default actions in config?
 18. Make subjects not case sensitive
+19. getCustomAction return sub-object from subject instead of array
+20. Clear up terminology subject vs object (object should probably stay a JS term)
+21. Order USE subjects based on command?
+22. Validate for user: "You didn't begin with an action"
+
+23. Look at pie doesn't work while in pocket anymore -> drop, remember either
+
+24. Add "Go Back?"
 
 
 */
@@ -110,7 +118,7 @@ function getAction(commandpromptinput){
     } else if(commandAction === "take" || commandAction === "pick") {
         return 'take';
     
-    } else if(commandAction === "look" || commandAction === "examine" || commandAction === "check") {
+    } else if(commandAction === "look" || commandAction === "examine" || commandAction === "check" || commandAction === "see") {
         return "look";
 
     } else {
@@ -121,15 +129,17 @@ function getAction(commandpromptinput){
 }
 
 function getSubject(command, actionableSubjects){
-    command = command.toLowerCase();
+    let actionlessCommand = command.substr(command.indexOf(" ") + 1).toLowerCase();
     let foundSubjects = [];
+    let foundSubjectsNames = [];
 
     // Cycle through the passages subjects
     for (let key in actionableSubjects) {
         // Cycle through the different names/keywords for each subject
         for(let i = 0; i < actionableSubjects[key]['keywords'].length; i++){
             // Test if user command contains any of the subject's names/keywords 
-            if(command.includes(actionableSubjects[key]['keywords'][i]) && $.inArray(actionableSubjects[key], foundSubjects) === -1){
+            if(actionlessCommand.includes(actionableSubjects[key]['keywords'][i]) && $.inArray(actionableSubjects[key]['name'], foundSubjectsNames) === -1){
+                foundSubjectsNames.push(actionableSubjects[key]['name']);
                 foundSubjects.push(actionableSubjects[key]);
             }
         }
@@ -167,9 +177,40 @@ function getCustomAction(action, subject, actionableSubjects){
     return false;
 }
 
+function getUseAction(subject, action){
+    console.log('Subjects for use action:');
+    console.log(subject);
+    console.log('possibleActions');
+    if(action == 'use'){
+            for(let key in subject[0]['possibleActions']['use']){
+            if(subject[0]['possibleActions']['use'][key]['name'] === subject[1]['name']){
+                    console.log('Matched use found:');
+                    console.log(subject[0]['possibleActions']['use'][key]);
+
+                    return subject[0]['possibleActions']['use'][key];
+            }
+        }
+
+        for(let key in subject[1]['possibleActions']['use']){
+            if(subject[1]['possibleActions']['use'][key]['name'] === subject[0]['name']){
+                console.log('Matched use found:');
+                console.log(subject[1]['possibleActions']['use'][key]);
+
+                return subject[1]['possibleActions']['use'][key];
+            }
+        }
+
+        return false;
+
+    } else {
+        return false;
+    }
+}
+
 function isValidCommand(action, subject, actionableSubjects){
     console.log("Action is " + action + ", array length is " + subject.length);
     // Test if the subject exists and if the action associated is defined
+    console.log(subject);
     if(subject.length === 1){
         if(subject[0]['possibleActions'][action]) {
             return true;
@@ -186,23 +227,50 @@ function isValidCommand(action, subject, actionableSubjects){
                 return true;
 
             } else {
+                console.log('Failed inventory check for DROP and FORGET');
+                return false;
+            }
+
+        } else {
+            console.log('Action failed DROP and FORGET validation');
+            return false;
+        }
+    } else if(subject.length === 2 && action === 'use' && getUseAction(subject, action)){
+        return true;
+
+    } else {
+        console.log("Failed at USE validation")
+        return false;
+    }
+}
+
+
+function isValidCommandOld(action, subject, actionableSubjects){
+    // Test if the subject exists and if the action associated is defined
+    if(subject){
+        if(subject['possibleActions'][action]) {
+            return true;
+
+        } else if(getCustomAction(action, subject, actionableSubjects)){
+            return true;
+            
+        } else if(action == "drop" || action == "forget"){
+            let subjectInventory = subject['possibleActions']['take']['inventory'];
+            let subjectMemoryBank = subject['possibleActions']['remember']['inventory'];
+
+            if(State["variables"][subjectInventory].has(subject['name']) || State["variables"][subjectMemoryBank].has(subject['name'])){
+                console.log("Valid because in inventory and action is DROP or FORGET");
+                return true;
+
+            } else {
                 return false;
             }
 
         } else {
             return false;
         }
-    } else if(subject.length === 2 && action === 'use'){
-        console.log('Two subjects detected');
-        return true;
-
-    } else {
-        return false;
     }
-}
-
-function validateUse(command, subject){
-
+    return false;
 }
 
 function performAction(command){
@@ -282,7 +350,15 @@ function performAction(command){
                 break;
             
             case 'use':
-                console.log("Use command activated.");
+                console.log("Use command true.");
+                let useAction = getUseAction(subject, action);
+
+                $(MESSAGEBOX).html(useAction['description']);
+
+                if(useAction['runfunction']){
+                    useAction['runfunction']();
+                } 
+                
                 break;
 
             default: 
