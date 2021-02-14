@@ -82,6 +82,8 @@ That probably looks like a lot so we'll do some simple examples.
         go: "blue room",
     }
 }>>
+
+<<passageactions $blueroom>>
 ```
 
 We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and will be the name that will be added to in inventories. In this case, the object is a room/passage, so it should not be added to inventories, unless you're doing something really experimental.
@@ -102,6 +104,8 @@ Next is `keywords` which defines every word that user might refer to your object
       look: "The book looks heavy, dusty, and old.",
     }
 } >>
+  
+<<passageactions $book>>
 ```
 
 The `look` action takes only one value which is the text to display when activated on the object. The words `examine` and `check` will also activate this action.
@@ -121,6 +125,8 @@ The `look` action takes only one value which is the text to display when activat
       }
     }
 } >>
+
+<<passageactions $dagger>>
 ```
 
 For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use.
@@ -139,9 +145,37 @@ For `take` the first option is `enabled` which determines if you can take the ob
       }
     }
 } >>
+
+<<passageactions $photo>>
 ```
 
 For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory.
+
+#### Use
+
+```javascript
+<<set $voodoodoll = {
+    name: "a voodoo doll",
+    keywords: ['voodoo doll', 'doll'],
+    possibleActions: {
+			use: {
+				dagger: {
+          name: "dagger",
+          description: "You poke the doll with the dagger. Ouch! It hurts you.",
+        },
+				book: {
+					name: 'book',
+					description: "You look up about the doll in the book which tells you it's name is Gary.",
+					runfunction: function(){alert("Gary. That's your name!")}
+        }
+      }
+    }
+	} >>
+  
+<<passageactions $voodoodoll>>
+```
+
+The `use` action allows you to have a valid command with two objects. In an objects you define the other objects available that can be used on it. So if you can use a `dagger` on a`voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. The `use` account can trigger a `description` and run a function.
 
 #### Drop & Forget
 
@@ -166,9 +200,38 @@ The `DROP` and `FORGET` actions are enabled for every item you can `TAKE` and `R
         }	
       }
 	} >>
+
+<<passageactions $pie>>
 ```
 
 For `custom actions` you define your own object keys based on the name of the action. You can have as many custom actions defined as you like. In the `action keywords` option, you define the different words the user could use to perform your custom action. `description` sets the text that will display after the user performs the action and `run function` is an optional option that let's you run a function after the user performs the action. 
+
+### Running Functions for Actions  from Story JS
+
+```javascript
+/* In your story JS */
+
+setup.yourFunction = function(){
+    console.log('This function can be run from from a passage');
+}
+
+/* In your passage */
+<<set $photo = {
+  	name: "a photo of a man",
+    keywords: ['photo', 'picture', 'image'],
+    possibleActions: {
+      remember: {
+        description: "You inspect the photograph. You will never forget those creepy eyes.",
+        inventory: "memorybank",
+        runfunction: setup.yourFunction // Here it is!
+      }
+    }
+} >>
+  
+<<passageactions $photo>>
+```
+
+If you want to run a function from your story JS for one of your defined actions, you have to set it up in a special way. Add your function to the `setup` variable and then call it in the action options.
 
 ### Configuration
 
@@ -179,7 +242,7 @@ This is a feature that hasn't been added yet.
 Below is an example of what a passage might look like with this code.
 
 ```javascript
-You sre in a red room. On the table is a cherry pie, a dagger, a book and a photo of a man. There is a blue door that leads to the blue room.
+You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo doll, and a photo of a man. There is a blue door that leads to the blue room.
 
 <div id="message-box" style="height: 35px"></div>
 <<commandbox "$command">>
@@ -241,8 +304,26 @@ You sre in a red room. On the table is a cherry pie, a dagger, a book and a phot
         go: "blue room",
     }
 }>>
+  
+<<set $voodoodoll = {
+    name: "a voodoo doll",
+    keywords: ['voodoo doll', 'doll'],
+    possibleActions: {
+      use: {
+        dagger: {
+          name: "dagger",
+          description: "You poke the doll with the dagger. Ouch! It hurts you.",
+        },
+        book: {
+          name: 'book',
+          description: "You look up about the doll in the book which tells you it's name is Gary.",
+          runfunction: function(){alert("Gary. That's your name!")}
+        }
+      }
+    }
+} >>
 
-<<passageactions $pie $photo $book $dagger $blueroom>>
+<<passageactions $pie $photo $book $dagger $blueroom $voodoodoll>>
 ```
 
 ### Persistent Actionable Objects/Inventory Actionable Objects
@@ -279,4 +360,3 @@ In general, you should make one of these for every inventory item or your game m
 This action will overwrite any actions already associated with $pie in the current passage, so it's best to use the same variable.
 
 If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
-
