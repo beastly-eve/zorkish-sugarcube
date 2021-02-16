@@ -30,7 +30,7 @@ This tag can take as many variables as Actionable Objects you define. It is requ
 
 #### Message Box Element
 
-The message box is a div that must be included if you want your actions to have any feedback text/messages. So, if the user "Looks" at an object, the text will appear in this box. By default the code is this:
+The message box is a div that must be included if you want your actions to have any feedback text/messages. So, if the player "Looks" at an object, the text will appear in this box. By default the code is this:
 
 `<div id="message-box" style="height: 35px"></div>`
 
@@ -93,13 +93,13 @@ That probably looks like a lot so we'll do some simple examples.
 <<passageactions $blueroom>>
 ```
 
-We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and is the name that will be added to in inventories. In this case, the object is a room/passage, so it shouldn't be added to inventories, unless you're doing something really experimental.
+We start by setting the `name`, this is the overall name of the object that the player can perform actions on. It's used by the system and is the name that will be added to in inventories. In this case, the object is a room/passage, so it shouldn't be added to inventories, unless you're doing something really experimental.
 
-Next is `keywords` which defines every word that user might refer to your object as. The system will search through the player's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the player to be able to use `Go north` or `Go up` for navigating passages, include north/up in your keywords.
+Next is `keywords` which defines every word that player might refer to your object as. The system will search through the player's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the player to be able to use `Go north` or `Go up` for navigating passages, include north/up in your keywords.
 
-`possibleActions` is where you define the actions the user can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
+`possibleActions` is where you define the actions the player can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
 
-`possibleActions > go` is triggered by the word "go" in the user's input. It takes one value, the passage name that it leads to.
+`possibleActions > go` is triggered by the word "go" in the player's input. It takes one value, the passage name that it leads to.
 
 #### Look
 
@@ -211,7 +211,7 @@ The `DROP` and `FORGET` actions are automatically enabled for every item you can
 <<passageactions $pie>>
 ```
 
-For `custom actions` you define your own arbitrary object keys based on the name of the action. You can have as many custom actions defined as you like. In the `actionkeywords` option, you define the different words the user could use to perform your custom action. `description` sets the text that will display after the user performs the action and `runfunction`  let's you run a function after the user performs the action. 
+For `custom actions` you define your own arbitrary object keys based on the name of the action. You can have as many custom actions defined as you like. In the `actionkeywords` option, you define the different words the player could use to perform your custom action. `description` sets the text that will display after the player performs the action and `runfunction`  let's you run a function after the player performs the action. 
 
 ### Running Functions for Actions  from Story JS
 
@@ -333,6 +333,18 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 <<passageactions $pie $photo $book $dagger $blueroom $voodoodoll>>
 ```
 
+### Organizing Your Code
+
+Looking at the above example, it may feel a little messy. It make it a little easier to deal with, I recommend separating your actions into a separate passage that you include. This way it won't get in the way of your writing. That would cause the main passage to look something like this, with the include statement having your passage names.
+
+```
+You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo doll, and a photo of a man. There is a blue door that leads to the blue room.
+
+<<include yourPassageWithCommandPrompt>>
+<<include yourPassageWithPassageActions>>
+
+```
+
 ### Persistent Actionable Objects/Inventory Actionable Objects
 
 If you want to add persistent actionable objects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
@@ -367,4 +379,3 @@ In general, you should make one of these for every inventory item or your game m
 This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.
 
 If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
-
