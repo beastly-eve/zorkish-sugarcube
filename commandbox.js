@@ -31,32 +31,30 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 
 /* TODO: 
 
-1. USE action ("Use key on door")
+1.
 
 3. Adjust function and variable cases and names to match
 
 7. Put custom fuctions into an object?
 8. Make code better, break up into more functions
 9. Tweego, git and github?
-10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other?
+10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other?  Validate for user: "You didn't begin with an action"
+
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
 
 15. Config option to reload passages on inventory updating?
 
 17. Set additonal keywords for default actions in config?
-18. Make subjects not case sensitive
+
 19. getCustomAction return sub-object from subject instead of array
 20. Clear up terminology subject vs object (object should probably stay a JS term)
 21. Order USE subjects based on command?
-22. Validate for user: "You didn't begin with an action"
 
-23. Look at pie doesn't work while in pocket anymore -> drop, remember either
-
-24. Add "Go Back?"
-25. Add more comments to code
 26. Add option for runfunction on every action?
 27. Config option to refresh passage for inventory and remember
+28. Custom pre-set commands
+29. Way to list all actions
 
 */
 
@@ -326,8 +324,10 @@ function performAction(command){
                         // Checks for inventory definition and adds it to inventory
                         State["variables"][objectinventory]["pickUp"](subject[0]['name']);
 
-                        // Reloads passage
-                        Engine.play(passage());
+                        // Reloads passage is refresh is true
+                        if(subject[0]['possibleActions']['take']['refresh']){
+                            Engine.play(passage());
+                        }
                     } else {
                         // If a valid command is not found, shake the commandbox as an error
                         $(COMMANDBOX).shake();
@@ -352,6 +352,12 @@ function performAction(command){
                 // Checks to see if inventory is defined and adds it to inventory, user default if not defined
                 let memoryinventory = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
                 State["variables"][memoryinventory]["pickUp"](subject[0]['name']);
+
+                // Reloads passage if refresh is true
+                if(subject[0]['possibleActions']['remember']['refresh']){
+                    Engine.play(passage());
+                }
+
                 break;
 
             case 'drop':
@@ -407,6 +413,12 @@ function performAction(command){
     $(COMMANDBOX).val("");
 
 }
+
+/*
+-------------------
+Messing around
+-------------------
+*/
 
 setup.testFunction = function(){
     console.log('Test function run');
