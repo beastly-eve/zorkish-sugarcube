@@ -51,11 +51,14 @@ Here's the structure with all of the possible options for an Actionable Object:
         enabled: false, // Boolean : Whether you can take or not
         description: "You take it.", // String : Custom description of taking if enabled is true (optional)
         disabledDescription: "You can't take it.", // String : Custom description if enabled is false, default is false
+        inventory: 'inventory', // String: Inventory to use
+        refresh: false // Boolean: Refreshes the passage after taking
       },
       remember: {
         description: "You will never forget it.", // String: Message to display when remembering
-        inventory: "memorybank",
+        inventory: "memorybank", // String: Inventory to use
         runfunction: false, // Function: function to run
+        refresh: false // Boolean: Refreshes the passage after remembering
       },
       use: {
         useonitem1: {
@@ -128,7 +131,8 @@ The `look` action takes only one value which is the text to display when activat
         enabled: true,
         description: 'You take the dagger. You might need to stab someone, later.',
         disabledDescription: 'The dagger melts into a puddle before your eyes.',
-        inventory: "inventory"
+        inventory: "inventory",
+        refresh: true
       }
     }
 } >>
@@ -136,7 +140,7 @@ The `look` action takes only one value which is the text to display when activat
 <<passageactions $dagger>>
 ```
 
-For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use.
+For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the object is taken, by default it's false. If this is enabled then the `description` won't show.
 
 #### Remember
 
@@ -156,7 +160,7 @@ For `take` the first option is `enabled` which determines if you can take the ob
 <<passageactions $photo>>
 ```
 
-For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory.
+For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory. `refresh` determines if the passage will be refreshed after the object is remembered, by default it's false. If this is enabled then the `description` won't show.
 
 #### Use
 
