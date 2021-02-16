@@ -95,7 +95,7 @@ That probably looks like a lot so we'll do some simple examples.
 
 We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and will be the name that will be added to in inventories. In this case, the object is a room/passage, so it should not be added to inventories, unless you're doing something really experimental.
 
-Next is `keywords` which defines every word that user might refer to your object as. The system will search through the user's command for one of these phrases to determine if they want to do something to this object. If you want the user to be able to enter `Go north` or `Go up` etc to go to your room/passage include north/up in your keywords.
+Next is `keywords` which defines every word that user might refer to your object as. The system will search through the user's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the user to be able to enter `Go north` or `Go up` etc to go to your room/passage include north/up in your keywords.
 
 `possibleActions` is where you define the actions the user can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
 
@@ -122,7 +122,7 @@ The `look` action takes only one value which is the text to display when activat
 ```javascript
 <<set $dagger = {
     name: 'dagger',
-    keywords: ['blade', 'knife'],
+    keywords: ['dagger', 'blade', 'knife'],
     possibleActions: {
       take: {
         enabled: true,
@@ -285,7 +285,7 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 
 <<set $dagger = {
     name: 'dagger',
-    keywords: ['blade', 'knife'],
+    keywords: ['dagger','blade', 'knife'],
     possibleActions: {
       take: {
         enabled: true,
