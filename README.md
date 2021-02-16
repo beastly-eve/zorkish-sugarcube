@@ -2,11 +2,11 @@
 
 ![screen-grab](screen-grab.gif)
 
-This is a work in progress macro/system to use Twine 2 to make text adventure-style games (Zork etc) where the user types in the action they want to make. 
+This is a **work in progress** macro/system to use Twine 2 and SugarCube2 to make text adventure-style games (Zork etc) where the player types in the action they want to perform. 
 
-The macro has the built in defaults actions of: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but the user can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
+The macro these built in actions: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but you can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
 
-The code for the command input box itself is adapted from the SugarCube textbox macro
+The code for the command input box itself is adapted from the SugarCube textbox macro.
 
 ## Usage
 
@@ -14,11 +14,11 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 
 #### Command Input box
 
-Each passage that you want the command input box to appear in needs to have the macro tag:
+Each passage that you want the command input box to appear in needs to have this macro tag:
 
 ` <<commandbox $command>>`
 
-This macro only takes one argument, which is the variable name that will be passed through the code to validate whether the command is possible and carry it out if it is. For now, only use the variable shown in the example.
+This macro only takes one argument, which is the variable name that's passed through the code to validate and carry out the player's command. For now, only use the variable shown in the example.
 
 #### Passage Actions Macro tag
 
@@ -30,7 +30,7 @@ This tag can take as many variables as Actionable Objects you define. It is requ
 
 #### Message Box Element
 
-The message box is div you need to include if you want your actions to have any feedback text/messages. So if the user "Looks" at an object, the text will appear in this box. By default the code is this:
+The message box is a div that must be included if you want your actions to have any feedback text/messages. So, if the user "Looks" at an object, the text will appear in this box. By default the code is this:
 
 `<div id="message-box" style="height: 35px"></div>`
 
@@ -79,7 +79,7 @@ That probably looks like a lot so we'll do some simple examples.
 
 ### Default Actions
 
-#### Go
+#### Go (Read this example first)
 
 ```javascript
 <<set $blueroom = {
@@ -93,9 +93,9 @@ That probably looks like a lot so we'll do some simple examples.
 <<passageactions $blueroom>>
 ```
 
-We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and will be the name that will be added to in inventories. In this case, the object is a room/passage, so it should not be added to inventories, unless you're doing something really experimental.
+We start by setting the `name`, this is the overall name of the object that the user can perform actions on. It's used by the system and is the name that will be added to in inventories. In this case, the object is a room/passage, so it shouldn't be added to inventories, unless you're doing something really experimental.
 
-Next is `keywords` which defines every word that user might refer to your object as. The system will search through the user's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the user to be able to enter `Go north` or `Go up` etc to go to your room/passage include north/up in your keywords.
+Next is `keywords` which defines every word that user might refer to your object as. The system will search through the player's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the player to be able to use `Go north` or `Go up` for navigating passages, include north/up in your keywords.
 
 `possibleActions` is where you define the actions the user can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
 
@@ -115,7 +115,7 @@ Next is `keywords` which defines every word that user might refer to your object
 <<passageactions $book>>
 ```
 
-The `look` action takes only one value which is the text to display when activated on the object. The words `examine` and `check` will also activate this action.
+The `look` action takes only one value which is the text to display when activated on the object. The words `examine`, `see`, and `check` will also activate this action.
 
 #### Take
 
@@ -142,15 +142,15 @@ For `take` the first option is `enabled` which determines if you can take the ob
 
 ```javascript
 <<set $photo = {
-  	name: "a photo of a man",
-    keywords: ['photo', 'picture', 'image'],
-    possibleActions: {
-      remember: {
-        description: "You inspect the photograph. You will never forget those creepy eyes.",
-        inventory: "memorybank",
-        runfunction: function(){alert("I'll never forget.")}
-      }
+  name: "a photo of a man",
+  keywords: ['photo', 'picture', 'image'],
+  possibleActions: {
+    remember: {
+      description: "You inspect the photograph. You will never forget those creepy eyes.",
+      inventory: "memorybank",
+      runfunction: function(){alert("I'll never forget.")}
     }
+  }
 } >>
 
 <<passageactions $photo>>
@@ -182,11 +182,11 @@ For the `remember` action there are two options, `description` which is the text
 <<passageactions $voodoodoll>>
 ```
 
-The `use` action allows you to have a valid command with two objects. In an objects you define the other objects available that can be used on it. So if you can use a `dagger` on a`voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
+The `use` action allows you to have a valid command with two objects. For an object, you define objects available that can be used ON it. So if you can use a `dagger` on a `voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
 
 #### Drop & Forget
 
-The `DROP` and `FORGET` actions are enabled for every item you can `TAKE` and `REMEMBER` respectively.
+The `DROP` and `FORGET` actions are automatically enabled for every item you can `TAKE` and `REMEMBER` respectively.
 
 ### Custom actions
 
@@ -211,7 +211,7 @@ The `DROP` and `FORGET` actions are enabled for every item you can `TAKE` and `R
 <<passageactions $pie>>
 ```
 
-For `custom actions` you define your own object keys based on the name of the action. You can have as many custom actions defined as you like. In the `action keywords` option, you define the different words the user could use to perform your custom action. `description` sets the text that will display after the user performs the action and `run function` is an optional option that let's you run a function after the user performs the action. 
+For `custom actions` you define your own arbitrary object keys based on the name of the action. You can have as many custom actions defined as you like. In the `actionkeywords` option, you define the different words the user could use to perform your custom action. `description` sets the text that will display after the user performs the action and `runfunction`  let's you run a function after the user performs the action. 
 
 ### Running Functions for Actions  from Story JS
 
@@ -272,7 +272,7 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 } >>
 	
 <<set $photo = {
-		name: "a photo of a man",
+  name: "a photo of a man",
     keywords: ['photo', 'picture', 'image'],
     possibleActions: {
       remember: {
@@ -337,7 +337,7 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 
 If you want to add persistent actionable objects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
 
-This includes actions on inventory items, so if you have an inventory item that you want actionable (including being able to DROP it or FORGET it) when it's in the inventory use code like this in your PassageFooter. Include a separate `passageactions` inside the `if` statement that checks if each inventory item is in the inventory.
+This includes actions on inventory items, so if you have an inventory item that you want actionable (including being able to DROP it or FORGET it) you have to define it in the PassageFooter. Include a separate `passageactions` inside an `if` statement for each inventory item that's in the inventory.
 
 In general, you should make one of these for every inventory item or your game may behave a little strangely.
 
@@ -348,23 +348,23 @@ In general, you should make one of these for every inventory item or your game m
     keywords: ['cherry pie', 'pie', 'tasty pie'],
     possibleActions: {
             look: "The pie is a bit squished from being in your pocket.",
-			customactions: {
-				smell: {
-						actionkeywords: ["sniff", "smell", "snort"],
-						description: "It smells fruity and tasty.",
-						},
-				eat: {
-						actionkeywords: ["eat", "munch", "bite"],
-						description: "It's too hot to eat.",
-					}
-				}
-        	}
+      customactions: {
+        smell: {
+          actionkeywords: ["sniff", "smell", "snort"],
+          description: "It smells fruity and tasty.",
+        },
+        eat: {
+          actionkeywords: ["eat", "munch", "bite"],
+          description: "It's too hot to eat.",
+        }
+      }
+    }
 	} >>\
   <<passageactions $pie>>\
 <</if>>\
 ```
 
-This action will overwrite any actions already associated with $pie in the current passage, so it's best to use the same variable.
+This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.
 
 If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
 
