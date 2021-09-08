@@ -98,6 +98,8 @@ The `look` action takes only one value which is the text to display when activat
 
 For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the object is taken, by default it's false. If this is enabled then the `description` won't show.
 
+Currently you should only use one inventory for this named `inventory`. Eventually you will be able to have multiple inventories named whatever you want, but for now this is what works.
+
 #### Remember
 
 ```javascript
@@ -117,6 +119,8 @@ For `take` the first option is `enabled` which determines if you can take the ob
 ```
 
 For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory. `refresh` determines if the passage will be refreshed after the object is remembered, by default it's false. If this is enabled then the `description` won't show.
+
+Currently you should only use one inventory for this named `memorybank`. Eventually you will be able to have multiple inventories named whatever you want, but for now this is what works.
 
 #### Use
 
@@ -293,6 +297,13 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 <<passageactions $pie $photo $book $dagger $blueroom $voodoodoll>>
 ```
 
+In order for the inventory functions to work, you will need to put this code in your games first screen or setup code.
+
+```javascript
+<<newinventory '$inventory'>>\
+<<newinventory '$memorybank'>>\
+```
+
 ### Organizing Your Code
 
 Looking at the above example, it may feel a little messy. It make it a little easier to deal with, I recommend separating your actions into a separate passage that you include. This way it won't get in the way of your writing. That would cause the main passage to look something like this, with the include statement having your passage names.
@@ -336,6 +347,6 @@ In general, you should make one of these for every inventory item or your game m
 <</if>>\
 ```
 
-This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.
+~~This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.~~ **For some reason it's not overwriting any more for me. So for now, you may also have to put an IF statement around where you define the object in the room as well**
 
 If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
