@@ -277,12 +277,22 @@ function isValidCommand(action, subject, actionableSubjects){
             return true;
         
         // Drop and Forget are never defined, validate them based on whether subject is in inventory
-        } else if(action == "drop" || action == "forget"){
+        } else if(action == "drop"){
             let subjectInventory = subject[0]['possibleActions']['take']['inventory'];
+
+            // Test if subject is in either the memory inventory or subject inventory TODO: Go through every inventory defined by inventory macro so more than two inventories can be used
+            if(State["variables"][subjectInventory].has(subject[0]['name'])){
+                return true;
+
+            } else {
+                return false;
+            }
+
+        } else if(action == "forget"){
             let subjectMemoryBank = subject[0]['possibleActions']['remember']['inventory'];
 
             // Test if subject is in either the memory inventory or subject inventory TODO: Go through every inventory defined by inventory macro so more than two inventories can be used
-            if(State["variables"][subjectInventory].has(subject[0]['name']) || State["variables"][subjectMemoryBank].has(subject[0]['name'])){
+            if(State["variables"][subjectMemoryBank].has(subject[0]['name'])){
                 return true;
 
             } else {
