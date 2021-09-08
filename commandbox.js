@@ -31,7 +31,7 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 
 /* TODO: 
 
-1.
+1. Automatically make linked passages actionable
 
 3. Adjust function and variable cases and names to match
 
@@ -153,6 +153,12 @@ const actionableSubjectDefaults = {
 Functions for Parsing and Performing actions 
 -------------------------------
 */
+
+// Takes the raw text of the passage to link any passage links
+function getPassageLinks(){
+    // TODO: Make this work
+}
+
 
 // Seperates the action from the beginning of the sentence and returns a normalized version
 function getAction(commandpromptinput){
@@ -324,10 +330,8 @@ function performAction(command){
                         // Checks for inventory definition and adds it to inventory
                         State["variables"][objectinventory]["pickUp"](subject[0]['name']);
 
-                        // Reloads passage is refresh is true
-                        if(subject[0]['possibleActions']['take']['refresh']){
-                            Engine.play(passage());
-                        }
+                        // Reloads passage
+                        Engine.play(passage());
                     } else {
                         // If a valid command is not found, shake the commandbox as an error
                         $(COMMANDBOX).shake();
@@ -352,12 +356,6 @@ function performAction(command){
                 // Checks to see if inventory is defined and adds it to inventory, user default if not defined
                 let memoryinventory = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
                 State["variables"][memoryinventory]["pickUp"](subject[0]['name']);
-
-                // Reloads passage if refresh is true
-                if(subject[0]['possibleActions']['remember']['refresh']){
-                    Engine.play(passage());
-                }
-
                 break;
 
             case 'drop':
@@ -413,12 +411,6 @@ function performAction(command){
     $(COMMANDBOX).val("");
 
 }
-
-/*
--------------------
-Messing around
--------------------
-*/
 
 setup.testFunction = function(){
     console.log('Test function run');
@@ -530,6 +522,7 @@ Macro.add('commandbox', {
         State.setVar(varName, "");
     }
 });
+
 
 /*
 SIMPLE INVENTORY SYSTEM GOES HERE

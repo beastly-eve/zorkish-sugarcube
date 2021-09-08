@@ -2,9 +2,9 @@
 
 ![screen-grab](screen-grab.gif)
 
-This is a **work in progress** macro/system to use Twine 2 and SugarCube2 to make text adventure-style games (Zork etc) where the player types in the action they want to perform. 
+This is a functional **work in progress** macro/system to use Twine 2 and SugarCube2 to make text adventure-style games (Zork etc) where the player types in the action they want to perform. 
 
-The macro these built in actions: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but you can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md
+The macro has these built in actions: GO, LOOK, TAKE, REMEMBER, USE, DROP, and FORGET, but you can define custom actions within the passage. The TAKE and REMEMBER actions use The Simple Inventory System by ChapelR for their functionality, so if you want to use them, you should have this macro enabled as well: https://github.com/ChapelR/custom-macros-for-sugarcube-2/blob/master/docs/simple-inventory.md . You can paste the code from it after the Zorkish Sugarcube code in your story JS.
 
 The code for the command input box itself is adapted from the SugarCube textbox macro.
 
@@ -35,50 +35,6 @@ The message box is a div that must be included if you want your actions to have 
 `<div id="message-box" style="height: 35px"></div>`
 
 Technically this is optional, but I can't imagine many use cases where you'd leave it out.
-
-### Defining Actions and Objects
-
-Here's the structure with all of the possible options for an Actionable Object:
-
-```javascript
-<<set $actionableObject = {
-  	name: "it", // String: The name used in text and for inventory
-  	keywords: [], // Array : The object's nicknames to identify it in a command
-  	possibleActions: {
-      go: false, // String : Passage name, doesn't work unless isPassage is true
-      look: "Nothing special about it.", // String : Description of what you see
-      take: {
-        enabled: false, // Boolean : Whether you can take or not
-        description: "You take it.", // String : Custom description of taking if enabled is true (optional)
-        disabledDescription: "You can't take it.", // String : Custom description if enabled is false, default is false
-        inventory: 'inventory', // String: Inventory to use
-        refresh: false // Boolean: Refreshes the passage after taking
-      },
-      remember: {
-        description: "You will never forget it.", // String: Message to display when remembering
-        inventory: "memorybank", // String: Inventory to use
-        runfunction: false, // Function: function to run
-        refresh: false // Boolean: Refreshes the passage after remembering
-      },
-      use: {
-        useonitem1: {
-          name: "item to use on it", // String: Name that matches the item that can be used on/with this item
-          description: "You use the item on it.", // String: Text to display
-          runfunction: false, // Function: Function to run
-        }
-      },
-      customactions: { // You can have as many as you want
-        customaction1: {
-          actionkeywords: [], // Array: the actions identifying keywords. Example: ["sniff", "smell", "snort"]
-          description: "You do the thing", // String: message to display when triggering action
-          runfunction: false // Function: to run
-        }
-      }
-    }
-} >>
-```
-
-That probably looks like a lot so we'll do some simple examples.
 
 ### Default Actions
 
@@ -246,7 +202,7 @@ If you want to run a function from your story JS for one of your defined actions
 
 ### Configuration
 
-This is a feature that hasn't been added yet.
+This is a feature that hasn't been added yet, but is not needed for it to work.
 
 ### Full Passage Code Example
 
