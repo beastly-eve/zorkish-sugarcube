@@ -73,6 +73,7 @@ const COMMANDBOX = "#commandbox-command";
 const TAKEINVENTORY = "inventory";
 const MEMORYBANK = "memorybank";
 const HELPCOMMANDENABLED = true;
+const ERRORMESSAGES = true;
 
 /* 
 -------------------------------
@@ -114,6 +115,73 @@ function ObjectLength( object ) {
     }
     return length;
 };
+
+/* Put passage actionable subjects into array, denoted by their keyword */
+
+function actionableSubjectsToArray(actionableSubjects){
+    let allPresentSubjects = [];
+
+    // Cycle through the different subjects and add first keyword to array.
+    for (let key in actionableSubjects) {
+           allPresentSubjects.push(actionableSubjects[key]['keywords'][0]);
+    }
+
+    // If there is nothing actionable return false, if there is return the array
+    if(allPresentSubjects.length === 0){
+        return false;
+    } else {
+        return allPresentSubjects;
+    }
+
+}
+
+/* Look for all of the actions defined for the subjects and put them into an array with no duplicates */
+function availableActionsToArray(actionableSubjects){
+    console.log('function availableActionsToArray was run');
+    console.log(actionableSubjects);
+
+    let allPossibleActions = [];
+
+    // Cycle through the passages subjects looking for basic actions
+    for (let key in actionableSubjects) {
+        // Create an array with the keys in possible actions section of the object
+        let actionArray = Object.keys(actionableSubjects[key]['possibleActions']);
+
+        // Cycle through the array of actions to add them to the master action array
+        for (let i = 0; i < actionArray.length; i++) {
+            // Check if it's a custom action and whether it's already in the master action array. If not add it.
+            if(actionArray[i] !== 'customactions' && !allPossibleActions.includes(actionArray[i])){
+                allPossibleActions.push(actionArray[i]);
+
+            } 
+        }
+
+        // Test for custom actions
+        if(actionableSubjects[key]['possibleActions']['customactions']){
+            // Create an array with the keys in possible custom actions of object
+            let customActionArray = Object.keys(actionableSubjects[key]['possibleActions']['customactions']);
+
+            for(let i = 0; i < customActionArray.length; i++){
+                if(!allPossibleActions.includes(customActionArray[i])){
+                    allPossibleActions.push(customActionArray[i]);
+
+                } 
+            }
+        }
+    }
+    
+    // If there are no valid commands return false, if there is return the array
+    if(allPossibleActions.length === 0){
+        return false;
+    } else {
+        return allPossibleActions;
+    }
+}
+
+/* Function to test custom function actions */
+setup.testFunction = function(){
+    console.log('Test function run');
+}
 
 /*  Actionable Subject Object example */
 const actionableSubjectDefaults = {
@@ -430,72 +498,6 @@ function performAction(command){
 
     $(COMMANDBOX).val("");
 
-}
-
-setup.testFunction = function(){
-    console.log('Test function run');
-}
-
-// Put passage actionable subjects into array, denoted by their keyword
-
-function actionableSubjectsToArray(actionableSubjects){
-    let allPresentSubjects = [];
-
-    // Cycle through the different subjects and add first keyword to array.
-    for (let key in actionableSubjects) {
-           allPresentSubjects.push(actionableSubjects[key]['keywords'][0]);
-    }
-
-    // If there is nothing actionable return false, if there is return the array
-    if(allPresentSubjects.length === 0){
-        return false;
-    } else {
-        return allPresentSubjects;
-    }
-
-}
-
-// Look for all of the actions defined for the subjects and put them into an array with no duplicates
-function availableActionsToArray(actionableSubjects){
-    console.log('function availableActionsToArray was run');
-    console.log(actionableSubjects);
-
-    let allPossibleActions = [];
-
-    // Cycle through the passages subjects looking for basic actions
-    for (let key in actionableSubjects) {
-        // Create an array with the keys in possible actions section of the object
-        let actionArray = Object.keys(actionableSubjects[key]['possibleActions']);
-
-        // Cycle through the array of actions to add them to the master action array
-        for (let i = 0; i < actionArray.length; i++) {
-            // Check if it's a custom action and whether it's already in the master action array. If not add it.
-            if(actionArray[i] !== 'customactions' && !allPossibleActions.includes(actionArray[i])){
-                allPossibleActions.push(actionArray[i]);
-
-            } 
-        }
-
-        // Test for custom actions
-        if(actionableSubjects[key]['possibleActions']['customactions']){
-            // Create an array with the keys in possible custom actions of object
-            let customActionArray = Object.keys(actionableSubjects[key]['possibleActions']['customactions']);
-
-            for(let i = 0; i < customActionArray.length; i++){
-                if(!allPossibleActions.includes(customActionArray[i])){
-                    allPossibleActions.push(customActionArray[i]);
-
-                } 
-            }
-        }
-    }
-    
-    // If there are no valid commands return false, if there is return the array
-    if(allPossibleActions.length === 0){
-        return false;
-    } else {
-        return allPossibleActions;
-    }
 }
 
 // List out all things you can interact with and valid commands
