@@ -68,12 +68,13 @@ Config (these don't really do much right now)
 */
 
 
-const MESSAGEBOX = "#message-box";
-const COMMANDBOX = "#commandbox-command";
-const TAKEINVENTORY = "inventory";
-const MEMORYBANK = "memorybank";
-const HELPCOMMANDENABLED = true;
-const ERRORMESSAGES = false;
+const MESSAGEBOX = "#message-box"; // Don't change this for now
+const COMMANDBOX = "#commandbox-command"; // Don't change this for now
+const TAKEINVENTORY = "inventory"; // Don't change this for now
+const MEMORYBANK = "memorybank"; // Don't change this for now
+
+const HELPCOMMANDENABLED = true; // YES this is configurable
+const ERRORMESSAGES = false; // YES this is configurable
 
 /* 
 -------------------------------

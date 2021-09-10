@@ -26,11 +26,11 @@ For the command box to do anything, you need to define what is actionable in you
 
 `<<passageactions $actionableobject1 $actionableobject2>>`
 
-This tag can take as many variables as Actionable Objects you define. It is required for each passage that uses this system. An empty variable will be ignored. How to set the object's options is in the Defining Objects and Actions section below. 
+This tag can take as many variables as actionable subjects you define. An actionable subject (or "subject") is a "thing" you define that can have actions performed on it. This tag is required for each passage that uses this system. An empty variable will be ignored. How to set the subject's options is in the Defining Subjects and Actions section below. 
 
 #### Message Box Element
 
-The message box is a div that must be included if you want your actions to have any feedback text/messages. So, if the player "Looks" at an object, the text will appear in this box. By default the code is this:
+The message box is a div that must be included if you want your actions to have any feedback text/messages. So, if the player "Looks" at a subject, the text will appear in this box. By default the code is this:
 
 `<div id="message-box" style="height: 35px"></div>`
 
@@ -52,11 +52,11 @@ Technically this is optional, but I can't imagine many use cases where you'd lea
 <<passageactions $blueroom>>
 ```
 
-We start by setting the `name`, this is the overall name of the object that the player can perform actions on. It's used by the system and is the name that will be added to in inventories. In this case, the object is a room/passage, so it shouldn't be added to inventories, unless you're doing something really experimental.
+We start by setting the `name`, this is the overall name of the subject that the player can perform actions on. It's used by the system and is the name that will be added to in inventories. In this case, the subject is a room/passage, so it shouldn't be added to inventories, unless you're doing something really experimental.
 
-Next is `keywords` which defines every word that player might refer to your object as. The system will search through the player's command for one of these phrases to determine if they want to do something to this object. It will not look at the `name` . If you want the player to be able to use `Go north` or `Go up` for navigating passages, include north/up in your keywords.
+Next is `keywords` which defines every word that player might refer to your subject as. The system will search through the player's command for one of these phrases to determine if they want to do something to this subject. It will not look at the `name` . If you want the player to be able to use `Go north` or `Go up` for navigating passages, include north/up in your keywords.
 
-`possibleActions` is where you define the actions the player can take on the actionable object. In this case, the object is a room/passage and has the `go` action defined.
+`possibleActions` is where you define the actions the player can take on the actionable subject. In this case, the subject is a room/passage and has the `go` action defined.
 
 `possibleActions > go` is triggered by the word "go" in the player's input. It takes one value, the passage name that it leads to.
 
@@ -74,7 +74,7 @@ Next is `keywords` which defines every word that player might refer to your obje
 <<passageactions $book>>
 ```
 
-The `look` action takes only one value which is the text to display when activated on the object. The words `examine`, `see`, and `check` will also activate this action.
+The `look` action takes only one value which is the text to display when activated on the subject. The words `examine`, `see`, and `check` will also activate this action.
 
 #### Take
 
@@ -96,7 +96,7 @@ The `look` action takes only one value which is the text to display when activat
 <<passageactions $dagger>>
 ```
 
-For `take` the first option is `enabled` which determines if you can take the object in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the object is taken, by default it's false. If this is enabled then the `description` won't show.
+For `take` the first option is `enabled` which determines if you can take the subject in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the object is taken, by default it's false. If this is enabled then the `description` won't show.
 
 Currently you should only use one inventory for this named `inventory`. Eventually you will be able to have multiple inventories named whatever you want, but for now this is what works.
 
@@ -118,7 +118,7 @@ Currently you should only use one inventory for this named `inventory`. Eventual
 <<passageactions $photo>>
 ```
 
-For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the object. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory. `refresh` determines if the passage will be refreshed after the object is remembered, by default it's false. If this is enabled then the `description` won't show.
+For the `remember` action there are two options, `description` which is the text that will display after performing the action and `run function` where you can define a javascript function to run when actioning the subject. `inventory` defines the name of the Simple Inventory to use, this should be different than the `take` inventory. `refresh` determines if the passage will be refreshed after the subject is remembered, by default it's false. If this is enabled then the `description` won't show.
 
 Currently you should only use one inventory for this named `memorybank`. Eventually you will be able to have multiple inventories named whatever you want, but for now this is what works.
 
@@ -146,11 +146,15 @@ Currently you should only use one inventory for this named `memorybank`. Eventua
 <<passageactions $voodoodoll>>
 ```
 
-The `use` action allows you to have a valid command with two objects. For an object, you define objects available that can be used ON it. So if you can use a `dagger` on a `voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
+The `use` action allows you to have a valid command with two subjects. For a subject, you define other subjects available that can be used ON it. So if you can use a `dagger` on a `voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
 
 #### Drop & Forget
 
-The `DROP` and `FORGET` actions are automatically enabled for every item you can `TAKE` and `REMEMBER` respectively.
+The `DROP` and `FORGET` actions are automatically enabled for every inventory item you can `TAKE` and `REMEMBER` respectively.
+
+#### Help
+
+The `HELP` command will list all subjects you can act on and all actions you can perform. This is turned on by default but can be turned off in the Config section in code by setting the const `HELPCOMMANDENABLED` to `false`
 
 ### Custom actions
 
@@ -175,7 +179,7 @@ The `DROP` and `FORGET` actions are automatically enabled for every item you can
 <<passageactions $pie>>
 ```
 
-For `custom actions` you define your own arbitrary object keys based on the name of the action. You can have as many custom actions defined as you like. In the `actionkeywords` option, you define the different words the player could use to perform your custom action. `description` sets the text that will display after the player performs the action and `runfunction`  let's you run a function after the player performs the action. 
+For `custom actions` you define your own arbitrary object keys in your subject options based on the name of the action. You can have as many custom actions defined as you like. In the `actionkeywords` option, you define the different words the player could use to perform your custom action. `description` sets the text that will display after the player performs the action and `runfunction`  let's you run a function after the player performs the action. 
 
 ### Running Functions for Actions  from Story JS
 
@@ -203,10 +207,6 @@ setup.yourFunction = function(){
 ```
 
 If you want to run a function from your story JS for one of your defined actions, you have to set it up in a special way. Add your function to the `setup` variable and then call it in the action options.
-
-### Configuration
-
-This is a feature that hasn't been added yet, but is not needed for it to work.
 
 ### Full Passage Code Example
 
@@ -306,7 +306,7 @@ In order for the inventory functions to work, you will need to put this code in 
 
 ### Organizing Your Code
 
-Looking at the above example, it may feel a little messy. It make it a little easier to deal with, I recommend separating your actions into a separate passage that you include. This way it won't get in the way of your writing. That would cause the main passage to look something like this, with the include statement having your passage names.
+Looking at the above example, it may feel a little messy. It make it a little easier to deal with, I recommend separating your subject definitions into a separate passage that you include. This way it won't get in the way of your writing. That would cause the main passage to look something like this, with the include statement having your passage names.
 
 ```
 You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo doll, and a photo of a man. There is a blue door that leads to the blue room.
@@ -316,9 +316,9 @@ You are in a red room. On the table is a cherry pie, a dagger, a book, a voodoo 
 
 ```
 
-### Persistent Actionable Objects/Inventory Actionable Objects
+### Persistent Actionable Subjects/Inventory Actionable Subjects
 
-If you want to add persistent actionable objects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
+If you want to add persistent actionable subjects that can work on any passage, create a PassageFooter and place them in there with a separate `<<passageactions $var >>` macro tag.
 
 This includes actions on inventory items, so if you have an inventory item that you want actionable (including being able to DROP it or FORGET it) you have to define it in the PassageFooter. Include a separate `passageactions` inside an `if` statement for each inventory item that's in the inventory.
 
@@ -349,4 +349,11 @@ In general, you should make one of these for every inventory item or your game m
 
 ~~This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.~~ **For some reason it's not overwriting any more for me. So for now, you may also have to put an IF statement around where you define the object in the room as well**
 
-If, alternatively, you DON'T want an object in your inventory to be actionable, set pie to an object with possibleActions empty.
+If, alternatively, you DON'T want a subject in your inventory to be actionable, set `pie` to a subject with possibleActions empty.
+
+### Debugging/Error messages
+
+For debugging your subject options/defined actions you can set the const `ERRORMESSAGES` to `true`. You can find it in the Config section of the code. It will display error messages in the message box. By default this is set to `false`
+
+
+
