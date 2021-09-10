@@ -32,7 +32,7 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 /* TODO: 
 
 1. Automatically make linked passages actionable
-
+2. Allow messages to appear after refresh
 3. Adjust function and variable cases and names to match
 
 7. Put custom fuctions into an object?
@@ -181,6 +181,13 @@ function availableActionsToArray(actionableSubjects){
 /* Function for displaying the message */
 function displayMessage(message) {
     $(MESSAGEBOX).html(message);
+}
+
+/* Function for displaying errors if enabled in config */
+function displayErrorMessage(message){
+    if(ERRORMESSAGES){
+        $(MESSAGEBOX).html('ERROR: ' + message);
+    }
 }
 
 /* Function to test custom function actions */
@@ -333,9 +340,11 @@ function getUseAction(subject, action){
             }
         }
         
+        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.')
         return false;
 
     } else {
+
         return false;
     }
 }
