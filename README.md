@@ -24,7 +24,7 @@ This macro only takes one argument, which is the variable name that's passed thr
 
 For the command box to do anything, you need to define what is actionable in your passage. You do this by setting variables into specifically formatted javascript objects and then passing the variables as arguments through the macro tag:
 
-`<<passageactions $actionableobject1 $actionableobject2>>`
+`<<passageactions $actionablesubject1 $actionablesubject2>>`
 
 This tag can take as many variables as actionable subjects you define. An actionable subject (or "subject") is a "thing" you define that can have actions performed on it. This tag is required for each passage that uses this system. An empty variable will be ignored. How to set the subject's options is in the Defining Subjects and Actions section below. 
 
@@ -96,7 +96,7 @@ The `look` action takes only one value which is the text to display when activat
 <<passageactions $dagger>>
 ```
 
-For `take` the first option is `enabled` which determines if you can take the subject in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the object is taken, by default it's false. If this is enabled then the `description` won't show.
+For `take` the first option is `enabled` which determines if you can take the subject in the first place. If it's `true` then the `description` text will show after taking. If it's `false` then the `disabledDescription` text will show after attempting to take it.  `inventory` defines the name of the Simple Inventory to use. `refresh` determines if the passage will be refreshed after the subject is taken, by default it's false. If this is enabled then the `description` won't show.
 
 Currently you should only use one inventory for this named `inventory`. Eventually you will be able to have multiple inventories named whatever you want, but for now this is what works.
 
@@ -146,7 +146,7 @@ Currently you should only use one inventory for this named `memorybank`. Eventua
 <<passageactions $voodoodoll>>
 ```
 
-The `use` action allows you to have a valid command with two subjects. For a subject, you define other subjects available that can be used ON it. So if you can use a `dagger` on a `voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an object in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two objects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
+The `use` action allows you to have a valid command with two subjects. For a subject, you define other subjects available that can be used ON it. So if you can use a `dagger` on a `voodoo doll`, then you define the action associated with the `dagger` in the`voodoo doll` options (as shown above). The `dagger` must also be defined as an subject in the passage or it will not validate, and the names must match exactly. You can define multiple use actions. If more than two subjects are detected it will reject the command. The `use` account can trigger a `description` and run a function.
 
 #### Drop & Forget
 
@@ -347,7 +347,7 @@ In general, you should make one of these for every inventory item or your game m
 <</if>>\
 ```
 
-~~This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.~~ **For some reason it's not overwriting any more for me. So for now, you may also have to put an IF statement around where you define the object in the room as well**
+~~This action will overwrite any actions already associated with `$pie` in the current passage, so it's best to use the same variable.~~ **For some reason it's not overwriting any more for me. So for now, you may also have to put an IF statement around where you define the subject in the room as well**
 
 If, alternatively, you DON'T want a subject in your inventory to be actionable, set `pie` to a subject with possibleActions empty.
 
