@@ -90,6 +90,12 @@ $(document).on(':passagestart', function (ev) {
 	actionableSubjects = {};
 });
 
+// Displays any inventory related messages after refresh
+$(document).on(':passagedisplay', function (ev) {
+	$(MESSAGEBOX).html(State.getVar("$inventorymessage"));
+    State.setVar("$inventorymessage", "");
+});
+
 /* Error command shake function */
 jQuery.fn.shake = function() {
     this.each(function(i) {
@@ -434,6 +440,7 @@ function performAction(command){
                     if(!State["variables"][objectinventory].has((subject[0]['name']))){
                          // Prints description text
                         $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['description']);
+                        State.setVar("$inventorymessage", subject[0]['possibleActions']['take']['description']);
 
                         // Checks for inventory definition and adds it to inventory
                         State["variables"][objectinventory]["pickUp"](subject[0]['name']);
@@ -455,6 +462,7 @@ function performAction(command){
             case 'remember':
                 // Prints description text
                 $(MESSAGEBOX).html(subject[0]['possibleActions']['remember']['description']);
+                
 
                 // If there's a function defined, run it
                 if(subject[0]['possibleActions']['remember']['runfunction']){
@@ -638,7 +646,7 @@ Macro.add('commandbox', {
                 delete postdisplay[task]; // single-use task
                 setTimeout(() => el.focus(), 200);
             };
-
+        
         // Set the variable and input element to the default value.
         State.setVar(varName, "");
     }
