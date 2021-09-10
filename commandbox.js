@@ -178,6 +178,11 @@ function availableActionsToArray(actionableSubjects){
     }
 }
 
+/* Function for displaying the message */
+function displayMessage(message) {
+    $(MESSAGEBOX).html(message);
+}
+
 /* Function to test custom function actions */
 setup.testFunction = function(){
     console.log('Test function run');
@@ -327,7 +332,7 @@ function getUseAction(subject, action){
                 return subject[1]['possibleActions']['use'][key];
             }
         }
-
+        
         return false;
 
     } else {
