@@ -73,7 +73,7 @@ const COMMANDBOX = "#commandbox-command";
 const TAKEINVENTORY = "inventory";
 const MEMORYBANK = "memorybank";
 const HELPCOMMANDENABLED = true;
-const ERRORMESSAGES = true;
+const ERRORMESSAGES = false;
 
 /* 
 -------------------------------
@@ -322,7 +322,6 @@ function getCustomAction(action, subject, actionableSubjects){
 
 // Gets the use action related to the subjects, also used for command validation
 function getUseAction(subject, action){
-    if(action == 'use'){
         // Check first subject's use definitions to see if any of them match second subject's name
         for(let key in subject[0]['possibleActions']['use']){
             // Return use action properties if match found
@@ -342,11 +341,6 @@ function getUseAction(subject, action){
         
         displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.')
         return false;
-
-    } else {
-
-        return false;
-    }
 }
 
 function isValidCommand(action, subject, actionableSubjects){
@@ -370,6 +364,8 @@ function isValidCommand(action, subject, actionableSubjects){
                 return true;
 
             } else {
+
+                displayErrorMessage('You cannot drop ' + subject[0]['name'] + ' because it\'s not in your inventory.');
                 return false;
             }
 
@@ -381,21 +377,33 @@ function isValidCommand(action, subject, actionableSubjects){
                 return true;
 
             } else {
+                displayErrorMessage('You cannot forget ' + subject[0]['name'] + ' because it\'s not in your memory bank.');
                 return false;
             }
+        } else if(action == "use"){
+            displayErrorMessage('The USE action requires two subjects. Only one was found.');
+            return false;
 
         } else {
+
+            displayErrorMessage('This action is not defined in the options for ' + subject[0]['name']);
             return false;
         }
     // If there are more than one subject, use the getUseAction function to validate the action USE against the command
     } else if(subject.length === 2 && action === 'use' && getUseAction(subject, action)){
         return true;
     
+    } else if(subject.length === 2 && action === 'use' && !getUseAction(subject, action)){
+        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.');
+        return false;
+
     // There's no subject found, so check to see if the help command is used and enabled
     } else if(action == "help" && HELPCOMMANDENABLED){ 
         return true;
     // No subject found and help command not being used
     } else {
+
+        displayErrorMessage('No valid subjects found in the command.');
         return false;
     }
 }
