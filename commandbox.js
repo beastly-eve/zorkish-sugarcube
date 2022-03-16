@@ -32,13 +32,12 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 /* TODO: 
 
 1. Automatically make linked passages actionable
-2. Allow messages to appear after refresh
+
 3. Adjust function and variable cases and names to match
 
 7. Put custom fuctions into an object?
 8. Make code better, break up into more functions
 9. Tweego, git and github?
-10. Error handling and Validate passage code: If there are multiple keywords in conflict or missing default arguments! Error for inventory not existing? Make an exists inventory test function?, objects have "use" statements for each other?  Validate for user: "You didn't begin with an action"
 
 11. Get command-box html tag from varName?
 12. Change actionableSubjects from object to array?
@@ -48,14 +47,13 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 17. Set additonal keywords for default actions in config?
 
 19. getCustomAction return sub-object from subject instead of array
-20. Clear up terminology subject vs object (object should probably stay a JS term)
-21. Order USE subjects based on command?
 
 26. Add option for runfunction on every action?
 27. Config option to refresh passage for inventory and remember
 28. Custom pre-set commands
-29. Way to list all actions
-30. Make the keys for actions automatically be used for the command
+
+30. Make the name keys for actions automatically be used for the command
+31. Auto complete subjects?
 
 */
 
@@ -123,14 +121,27 @@ function ObjectLength( object ) {
     return length;
 };
 
-/* Put passage actionable subjects into array, denoted by their keyword */
+/* Put passage actionable subjects into array, denoted by their keyword, includesecret is a boolean  */
 
-function actionableSubjectsToArray(actionableSubjects){
+function actionableSubjectsToArray(actionableSubjects, includesecret){
     let allPresentSubjects = [];
 
-    // Cycle through the different subjects and add first keyword to array.
-    for (let key in actionableSubjects) {
-           allPresentSubjects.push(actionableSubjects[key]['keywords'][0]);
+    if(includesecret === true){
+        // Cycle through the different subjects and add first keyword to array.
+        for (let key in actionableSubjects) {
+            allPresentSubjects.push(actionableSubjects[key]['keywords'][0]);
+        }
+
+    } else {
+        // Cycle through the different subjects and add first keyword to array.
+        for (let key in actionableSubjects) {
+            if(actionableSubjects[key]['secret'] === true) {
+                // Nothing
+
+            } else {
+                allPresentSubjects.push(actionableSubjects[key]['keywords'][0]);
+            }
+        }
     }
 
     // If there is nothing actionable return false, if there is return the array
@@ -151,7 +162,7 @@ function availableActionsToArray(actionableSubjects){
 
     // Cycle through the passages subjects looking for basic actions
     for (let key in actionableSubjects) {
-        // Create an array with the keys in possible actions section of the object
+        // Create an array with the keys in possible actions section of the subject
         let actionArray = Object.keys(actionableSubjects[key]['possibleActions']);
 
         // Cycle through the array of actions to add them to the master action array
@@ -165,7 +176,7 @@ function availableActionsToArray(actionableSubjects){
 
         // Test for custom actions
         if(actionableSubjects[key]['possibleActions']['customactions']){
-            // Create an array with the keys in possible custom actions of object
+            // Create an array with the keys in possible custom actions of subject
             let customActionArray = Object.keys(actionableSubjects[key]['possibleActions']['customactions']);
 
             for(let i = 0; i < customActionArray.length; i++){
@@ -202,10 +213,11 @@ setup.testFunction = function(){
     console.log('Test function run');
 }
 
-/*  Actionable Subject Object example */
+/*  Actionable Subject object example */
 const actionableSubjectDefaults = {
         name: "it", // String: The name used in text and for inventory
-        keywords: [], // Array : The object's nicknames to identify it in a command
+        keywords: [], // Array : The subject's nicknames to identify it in a command
+        secret: false, // Boolean: whether or not this subject should be hidden from the HELP command
         possibleActions: {
             go: false, // String : Passage name
             look: "Nothing special about it.", // String : Description of what you see
@@ -434,16 +446,16 @@ function performAction(command){
                 break;
 
             case 'take':
-                let objectinventory = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let subjectinventory = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
 
                 if(subject[0]['possibleActions']['take']['enabled']){
-                    if(!State["variables"][objectinventory].has((subject[0]['name']))){
+                    if(!State["variables"][subjectinventory].has((subject[0]['name']))){
                          // Prints description text
                         $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['description']);
                         State.setVar("$inventorymessage", subject[0]['possibleActions']['take']['description']);
 
                         // Checks for inventory definition and adds it to inventory
-                        State["variables"][objectinventory]["pickUp"](subject[0]['name']);
+                        State["variables"][subjectinventory]["pickUp"](subject[0]['name']);
 
                         // Reloads passage
                         Engine.play(passage());
@@ -478,9 +490,9 @@ function performAction(command){
                 $(MESSAGEBOX).html('You drop it.');
 
                 // Get the inventory the subject is a part of
-                let objectinventory4drop = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let subjectinventory4drop = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
                 // Drop the subject from inventory
-                State["variables"][objectinventory4drop]["drop"](subject[0]['name']);
+                State["variables"][subjectinventory4drop]["drop"](subject[0]['name']);
 
                 // Reloads passage
                 Engine.play(passage());
@@ -534,14 +546,14 @@ function performAction(command){
 // List out all things you can interact with and valid commands
 function helpCommand(actionableSubjects){
 
-    let allPresentSubjects = actionableSubjectsToArray(actionableSubjects);
+    let allPresentSubjects = actionableSubjectsToArray(actionableSubjects, false);
     let allValidActions = availableActionsToArray(actionableSubjects);
 
     if(!allPresentSubjects) {
         allPresentSubjects = 'Nothing.';
     }
     
-    $(MESSAGEBOX).html('What you can interact with: ' + allPresentSubjects.toString() + '<br>Valid commands: ' + allValidActions.toString());
+    $(MESSAGEBOX).html('Known things to interact with: ' + allPresentSubjects.toString() + '<br>Valid commands: ' + allValidActions.toString());
 
 }
 
