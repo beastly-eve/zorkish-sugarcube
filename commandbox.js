@@ -54,6 +54,7 @@ The code for the command input box itself is adapted from the SugarCube textbox 
 
 30. Make the name keys for actions automatically be used for the command
 31. Auto complete subjects?
+32. Remove option for multiple inventories
 
 */
 
@@ -73,6 +74,7 @@ const MEMORYBANK = "memorybank"; // Don't change this for now
 
 const HELPCOMMANDENABLED = true; // YES this is configurable
 const ERRORMESSAGES = false; // YES this is configurable
+const COMMANDINMESSAGE = false; //YES this is configurable
 
 /* 
 -------------------------------
@@ -197,14 +199,19 @@ function availableActionsToArray(actionableSubjects){
 }
 
 /* Function for displaying the message */
-function displayMessage(message) {
-    $(MESSAGEBOX).html(message);
+function displayMessage(message, command) {
+    if(COMMANDINMESSAGE){
+        let messagePlusCommand = '> ' + command.toUpperCase() + '<br>' + message;
+        $(MESSAGEBOX).html(messagePlusCommand);
+    } else {
+        $(MESSAGEBOX).html(message);
+    }
 }
 
 /* Function for displaying errors if enabled in config */
-function displayErrorMessage(message){
+function displayErrorMessage(message, command){
     if(ERRORMESSAGES){
-        $(MESSAGEBOX).html('ERROR: ' + message);
+        displayMessage('ERROR: ' + message, command);
     }
 }
 
@@ -340,7 +347,7 @@ function getCustomAction(action, subject, actionableSubjects){
 }
 
 // Gets the use action related to the subjects, also used for command validation
-function getUseAction(subject, action){
+function getUseAction(subject, action, command){
         // Check first subject's use definitions to see if any of them match second subject's name
         for(let key in subject[0]['possibleActions']['use']){
             // Return use action properties if match found
@@ -358,11 +365,11 @@ function getUseAction(subject, action){
             }
         }
         
-        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.')
+        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.', command)
         return false;
 }
 
-function isValidCommand(action, subject, actionableSubjects){
+function isValidCommand(action, subject, actionableSubjects, command){
     
     // Check to see if multiple subjects returned (multiple subjects are relevent for 'USE' command or the command will be rejected)
     if(subject.length === 1){
@@ -376,7 +383,7 @@ function isValidCommand(action, subject, actionableSubjects){
         
         // Drop and Forget are never defined, validate them based on whether subject is in inventory
         } else if(action == "drop"){
-            let subjectInventory = subject[0]['possibleActions']['take']['inventory'];
+            let subjectInventory = TAKEINVENTORY;
 
             // Test if subject is in either the memory inventory or subject inventory TODO: Go through every inventory defined by inventory macro so more than two inventories can be used
             if(State["variables"][subjectInventory].has(subject[0]['name'])){
@@ -384,36 +391,36 @@ function isValidCommand(action, subject, actionableSubjects){
 
             } else {
 
-                displayErrorMessage('You cannot drop ' + subject[0]['name'] + ' because it\'s not in your inventory.');
+                displayErrorMessage('You cannot drop ' + subject[0]['name'] + ' because it\'s not in your inventory.', command);
                 return false;
             }
 
         } else if(action == "forget"){
-            let subjectMemoryBank = subject[0]['possibleActions']['remember']['inventory'];
+            let subjectMemoryBank = MEMORYBANK;
 
             // Test if subject is in either the memory inventory or subject inventory TODO: Go through every inventory defined by inventory macro so more than two inventories can be used
             if(State["variables"][subjectMemoryBank].has(subject[0]['name'])){
                 return true;
 
             } else {
-                displayErrorMessage('You cannot forget ' + subject[0]['name'] + ' because it\'s not in your memory bank.');
+                displayErrorMessage('You cannot forget ' + subject[0]['name'] + ' because it\'s not in your memory bank.', command);
                 return false;
             }
         } else if(action == "use"){
-            displayErrorMessage('The USE action requires two subjects. Only one was found.');
+            displayErrorMessage('The USE action requires two subjects. Only one was found.', command);
             return false;
 
         } else {
 
-            displayErrorMessage('This action is not defined in the options for ' + subject[0]['name']);
+            displayErrorMessage('This action is not defined in the options for ' + subject[0]['name'], command);
             return false;
         }
     // If there are more than one subject, use the getUseAction function to validate the action USE against the command
-    } else if(subject.length === 2 && action === 'use' && getUseAction(subject, action)){
+    } else if(subject.length === 2 && action === 'use' && getUseAction(subject, action, command)){
         return true;
     
-    } else if(subject.length === 2 && action === 'use' && !getUseAction(subject, action)){
-        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.');
+    } else if(subject.length === 2 && action === 'use' && !getUseAction(subject, action, command)){
+        displayErrorMessage('Neither ' + subject[0]['name'] + ' or ' + subject[1]['name'] + ' has the other defined in their USE property.', command);
         return false;
 
     // There's no subject found, so check to see if the help command is used and enabled
@@ -422,7 +429,7 @@ function isValidCommand(action, subject, actionableSubjects){
     // No subject found and help command not being used
     } else {
 
-        displayErrorMessage('No valid subjects found in the command.');
+        displayErrorMessage('No valid subjects found in the command.', command);
         return false;
     }
 }
@@ -432,7 +439,7 @@ function performAction(command){
     var subject = getSubject(command, actionableSubjects);
 
     // Check if the command is valid
-    if(isValidCommand(action, subject, actionableSubjects)){
+    if(isValidCommand(action, subject, actionableSubjects, command)){
 
         switch(action){
             case 'go': 
@@ -442,16 +449,16 @@ function performAction(command){
 
             case 'look': 
                 // Prints description text
-                $(MESSAGEBOX).html(subject[0]['possibleActions']['look']);
+                displayMessage(subject[0]['possibleActions']['look'], command);
                 break;
 
             case 'take':
-                let subjectinventory = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let subjectinventory = TAKEINVENTORY;
 
                 if(subject[0]['possibleActions']['take']['enabled']){
                     if(!State["variables"][subjectinventory].has((subject[0]['name']))){
                          // Prints description text
-                        $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['description']);
+                        displayMessage(subject[0]['possibleActions']['take']['description'], command);
                         State.setVar("$inventorymessage", subject[0]['possibleActions']['take']['description']);
 
                         // Checks for inventory definition and adds it to inventory
@@ -466,14 +473,14 @@ function performAction(command){
                    
                 } else {
                     // Prints disabled description text
-                    $(MESSAGEBOX).html(subject[0]['possibleActions']['take']['disabledDescription']);
+                    displayMessage(subject[0]['possibleActions']['take']['disabledDescription'], command);
                     
                 }
                 break;
 
             case 'remember':
                 // Prints description text
-                $(MESSAGEBOX).html(subject[0]['possibleActions']['remember']['description']);
+                displayMessage(subject[0]['possibleActions']['remember']['description'], command);
                 
 
                 // If there's a function defined, run it
@@ -482,15 +489,15 @@ function performAction(command){
                 }
 
                 // Checks to see if inventory is defined and adds it to inventory, user default if not defined
-                let memoryinventory = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                let memoryinventory = MEMORYBANK;
                 State["variables"][memoryinventory]["pickUp"](subject[0]['name']);
                 break;
 
             case 'drop':
-                $(MESSAGEBOX).html('You drop it.');
+                displayMessage('You drop it.', command);
 
                 // Get the inventory the subject is a part of
-                let subjectinventory4drop = subject[0]['possibleActions']['take']['inventory'] || TAKEINVENTORY;
+                let subjectinventory4drop = TAKEINVENTORY;
                 // Drop the subject from inventory
                 State["variables"][subjectinventory4drop]["drop"](subject[0]['name']);
 
@@ -499,18 +506,18 @@ function performAction(command){
                 break;
             
             case 'forget':
-                $(MESSAGEBOX).html('It\'s forgotten.');
+                displayMessage('It\'s forgotten.', command);
 
                 // Get the inventory the subject is a part of
-                let memoryinventory4forget = subject[0]['possibleActions']['remember']['inventory'] || MEMORYBANK;
+                let memoryinventory4forget = MEMORYBANK;
                 // Drop the subject from inventory
                 State["variables"][memoryinventory4forget]["drop"](subject[0]['name']);
                 break;
             
             case 'use':
-                let useAction = getUseAction(subject, action);
+                let useAction = getUseAction(subject, action, command);
 
-                $(MESSAGEBOX).html(useAction['description']);
+                displayMessage(useAction['description'], command);
 
                 if(useAction['runfunction']){
                     useAction['runfunction']();
@@ -525,7 +532,7 @@ function performAction(command){
                 let customaction = getCustomAction(action, subject[0], actionableSubjects);
 
                 // Prints description text
-                $(MESSAGEBOX).html(customaction[0]);
+                displayMessage(customaction[0], command);
 
                 // If there's a function defined, run it
                 if(customaction[1]){
@@ -553,7 +560,7 @@ function helpCommand(actionableSubjects){
         allPresentSubjects = 'Nothing.';
     }
     
-    $(MESSAGEBOX).html('Known things to interact with: ' + allPresentSubjects.toString() + '<br>Valid commands: ' + allValidActions.toString());
+    displayMessage('Known things to interact with: ' + allPresentSubjects.toString() + '<br>Valid commands: ' + allValidActions.toString(), command);
 
 }
 
